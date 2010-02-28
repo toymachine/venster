@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>Test calling Python from within html</title>
+
+<script>
+function callPython() {
+    var a = parseInt(document.getElementById("a").value);
+    var b = parseInt(document.getElementById("b").value);
+    alert("python says: " + window.external.sum(a, b));
+}
+
+</script>
+
+</head>
+
+
+<body onload="window.external.announce(document.getElementById('x'));">
+<input id="a" value="10"/>
+<input id="b" value="20"/>
+<input id="x"/>
+<button onclick="callPython();">Click Me!</button>
+<button onclick="window.external.roundtrip();">Roundtrip</button>
+<br>
+See how title of window and/or statubar changes by listening to IE6 events:
+<a href="http://www.python.org">Click Me</a>
+</body>
+</html>

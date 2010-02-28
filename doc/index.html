@@ -1,0 +1,80 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+
+<body>
+<h1>&nbsp;Venster</h1>
+
+<h3>Introduction</h3>
+<p>
+Venster is a highly native Windows GUI toolkit for Python based on the ctypes ffi library. The aim of Venster is to be a very lightweight wrapper around the standard Win32 API, making it easy to write slick windows applications in pure Python.
+</p>
+<p>
+Please note that Venster is currently very alpha, and it is provided to get feedback from
+the Windows and Python developer communities.
+</p>
+<p>
+Venster is an open source library and is hosted at <a href="http://sourceforge.net/projects/venster/">Sourceforge</a>.
+</p>
+<h3>Mailing list</h3>
+<p>
+A mailing list for general discussion on Venster is hosted by sourceforge. You can join the list <a href="https://lists.sourceforge.net/lists/listinfo/venster-users">here...</a>
+</p>
+<h3>HOWTO's</h3>
+<p><a href="resdll.html">Howto create a dialog with Venster</a></p>
+<h3>Developers</h3>
+<p>Information for developers who want to contribute can be found <a href="developers.html">here ...</a></p>
+<h3>Installing Venster</h3>
+<ul>
+<li>
+<p>&nbsp;Installing venster; first download and install the ctypes 0.6.2a package from <a target="_blank" href="http://sourceforge.net/project/showfiles.php?group_id=71702">here</a>
+, Then download the source distribution (.zip file) of Venster 0.3 from <a target="_blank" href="http://sourceforge.net/project/showfiles.php?group_id=79630">here</a>
+
+</p></li>
+<li>
+<p>
+&nbsp;Unpack the Venster zip file in some folder; and issue a <span class="cmd">python setup.py install</span> in that folder.
+</p>
+</li>
+<li>
+<p>
+&nbsp;The venster distribution contains a subfolder <span class="cmd">test</span> which contains some samples on how to use Venster.
+</p>
+</li>
+
+<li>
+<p>
+&nbsp;<span class="cmd">test_app.pyw</span> is an example of a typical explorer style windows program:
+<p>
+<img src="application.png">
+</p>
+It uses the windows <span class="cmd">TreeView</span> and <span class="cmd">TabControl</span> Common Controls.
+It also hosts the <span class="cmd">Internet Explorer Control</span>
+</p> 
+</li>
+
+<li>
+<p>
+&nbsp;Another example is <span class="cmd">test_coolbar</span>:
+<p>
+<img src="coolbar.png">
+</p>
+This example shows the use of a <span class="cmd">Toolbar</span> Common Control with a menu. This is a
+very sleek UI feature that was first introduced by Internet Explorer.
+</p>
+</li>
+</ul>
+
+Any suggestions, patches etc can be mailed to henk_entree.nl, please substitute the underscore with
+'@' before mailing me.
+
+<br/>
+<br/>
+<br/>
+<br/>
+<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=79630&amp;type=4" width="125" height="37" border="0" alt="SourceForge.net Logo" /></a>
+
+
+</body>
+</html>
