@@ -8,11 +8,25 @@
 
 <h3>Introduction</h3>
 <p>
-Venster is a highly native Windows GUI toolkit for Python based on the ctypes ffi library. The aim of Venster is to be a very lightweight wrapper around the standard Win32 API, making it easy to write slick windows applications in pure Python.
+Venster is a highly native Windows GUI toolkit for Python based on the ctypes ffi library.
+</p>
+<p>The aim of Venster is to be a very lightweight wrapper around the standard Win32 API, making it easy to write slick windows applications in pure Python.</p>
 </p>
 <p>
-Please note that Venster is currently very alpha, and it is provided to get feedback from
+Please note that Venster is currently alpha code, and it is provided to get feedback from
 the Windows and Python developer communities.
+</p>
+<p>
+Despite being alpha, it is also already very useful and can certainly be used to succesfully create native windows programs in Python.
+<br/>Combine Venster with <a href="http://starship.python.net/crew/theller/py2exe/">py2exe</a> to create windows executables and
+<a href="http://nsis.sourceforge.net/">NSIS</a> to create an installer, and you have a great way to deliver Python programs to your users
+on the Windows platform.
+</p>
+<p>
+<a href="http://prdownloads.sourceforge.net/venster/sampleapp.installer.exe?download">Click on this link to download an example of a Windows application created with Venster.</a>
+<p>
+This example shows that Venster can be used to create standalone Windows applications in Python with minimal runtime requirements.
+<br/>Everything is included within the 800Kb package and the program can be installed on any Windows machine with no additional downloads.
 </p>
 <p>
 Venster is an open source library and is hosted at <a href="http://sourceforge.net/projects/venster/">Sourceforge</a>.
@@ -21,15 +35,17 @@ Venster is an open source library and is hosted at <a href="http://sourceforge.n
 <p>
 A mailing list for general discussion on Venster is hosted by sourceforge. You can join the list <a href="https://lists.sourceforge.net/lists/listinfo/venster-users">here...</a>
 </p>
-<h3>HOWTO's</h3>
-<p><a href="resdll.html">Howto create a dialog with Venster</a></p>
+<h3>Tutorial and HOWTO's</h3>
+<p><a href="tutorial.html">The essential Venster example: 'Hello World'</a></p>
+<p><a href="resdll.html">Howto create a dialog from a resource DLL</a></p>
+
 <h3>Developers</h3>
 <p>Information for developers who want to contribute can be found <a href="developers.html">here ...</a></p>
 <h3>Installing Venster</h3>
 <ul>
 <li>
-<p>&nbsp;Installing venster; first download and install the ctypes 0.6.2a package from <a target="_blank" href="http://sourceforge.net/project/showfiles.php?group_id=71702">here</a>
-, Then download the source distribution (.zip file) of Venster 0.3 from <a target="_blank" href="http://sourceforge.net/project/showfiles.php?group_id=79630">here</a>
+<p>&nbsp;Installing venster; first download and install the latest ctypes package (select the installer .exe for your Python version) from <a target="_blank" href="http://sourceforge.net/project/showfiles.php?group_id=71702">here</a>
+,<br/>Then download the latest source distribution (.zip file) of Venster from <a target="_blank" href="http://sourceforge.net/project/showfiles.php?group_id=79630">here</a>
 
 </p></li>
 <li>
@@ -42,7 +58,9 @@ A mailing list for general discussion on Venster is hosted by sourceforge. You c
 &nbsp;The venster distribution contains a subfolder <span class="cmd">test</span> which contains some samples on how to use Venster.
 </p>
 </li>
-
+</ul>
+<h3>Examples</h3>
+<ul>
 <li>
 <p>
 &nbsp;<span class="cmd">test_app.pyw</span> is an example of a typical explorer style windows program:
@@ -51,7 +69,7 @@ A mailing list for general discussion on Venster is hosted by sourceforge. You c
 </p>
 It uses the windows <span class="cmd">TreeView</span> and <span class="cmd">TabControl</span> Common Controls.
 It also hosts the <span class="cmd">Internet Explorer Control</span>
-</p> 
+</p>
 </li>
 
 <li>

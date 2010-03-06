@@ -64,25 +64,28 @@ class Tree(tree.Tree):
     def OnItemExpanding(self, event):
         print "item expanding"
 
+    ntf_handler(comctl.TVN_ITEMEXPANDING)(OnItemExpanding)
+
     def OnSelectionChanged(self, event):
         print "on sel changed"
-        nmtv = comctl.NMTREEVIEW.from_address(int(event.lParam))
+        nmtv = event.structure(comctl.NMTREEVIEW)
         print nmtv.ptDrag
-        print self.GetParent()
-        
-    _msg_map_ = MSG_MAP([NTF_HANDLER(comctl.TVN_ITEMEXPANDING, OnItemExpanding),
-                         NTF_HANDLER(comctl.TVN_SELCHANGED, OnSelectionChanged)])
+
+    ntf_handler(comctl.TVN_SELCHANGED)(OnSelectionChanged)
+                         
 
 class Form(form.Form):
-    _class_icon_ = Icon("COW.ICO")
-    _class_icon_sm_ = _class_icon_
-    _class_accels_ = [(FCONTROL|FVIRTKEY, ord("O"), form.ID_OPEN),
+    _window_icon_ = Icon("COW.ICO")
+    _window_icon_sm_ = _window_icon_
+    _window_title_ = "Supervaca al Rescate!"
+
+    _form_accels_ = [(FCONTROL|FVIRTKEY, ord("O"), form.ID_OPEN),
                       (FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW)]
     
-    _class_form_exit_ = form.EXIT_ONLASTDESTROY
+    _form_exit_ = form.EXIT_ONLASTDESTROY
 
-    _class_form_status_msgs_ = {form.ID_NEW: "Creates a new window.",
-                                form.ID_OPEN: "Frobnicates a new Widget!"}
+    _form_status_msgs_ = {form.ID_NEW: "Creates a new window.",
+                          form.ID_OPEN: "Frobnicates a new Widget!"}
 
     _form_menu_ = [(MF_POPUP, "&File", 
                     [(MF_STRING, "&New\tCtrl+N", form.ID_NEW),
@@ -102,11 +105,7 @@ class Form(form.Form):
                      (MF_STRING, "&Redo", form.ID_REDO)])
                    ]
 
-    _form_title_ = "Supervaca al Rescate!"
-    
-    def __init__(self):
-        form.Form.__init__(self)      
-
+    def OnCreate(self, event):
         noteBook = notebook.NoteBook(parent = self, orExStyle = WS_EX_CLIENTEDGE)
         
         aBrowser = browser.Browser("http://www.python.org", parent = noteBook,
@@ -125,7 +124,6 @@ class Form(form.Form):
         noteBook.AddTab(1, "blaat2", aList)
 
         aTree = Tree(parent = self, orExStyle = WS_EX_CLIENTEDGE)
-        
 
         aSplitter = splitter.Splitter(parent = self, splitPos = 150)
         aSplitter.Add(0, aTree)
@@ -137,21 +135,20 @@ class Form(form.Form):
         self.controls.Add(form.CTRL_STATUSBAR, comctl.StatusBar(parent = self))
         self.controls.Add(form.CTRL_VIEW, aSplitter)
         
-
     def OnNew(self, event):
         form = Form()
         form.ShowWindow()
 
+    cmd_handler(form.ID_NEW)(OnNew)
+    
     def OnOpen(self, event):
         ofn = comdlg.OpenFileDialog()
         ofn.filter = "Blaat Document (*.bla)|*.bla|All files (*.*)|*.*"
         #TODO: flags dont' work!
         ofn.Flags = comdlg.OFN_FILEMUSTEXIST|comdlg.OFN_PATHMUSTEXIST
         print ofn.DoModal(parent = self)
-        
-    _msg_map_ = MSG_MAP([CMD_ID_HANDLER(form.ID_NEW, OnNew),                         
-                         CMD_ID_HANDLER(form.ID_OPEN, OnOpen),
-                         CHAIN_MSG_MAP(form.Form._msg_map_)])
+
+    cmd_handler(form.ID_OPEN)(OnOpen)
    
 
 mainForm = Form()

@@ -1,0 +1,84 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+
+<body>
+<h1>&nbsp;Venster</h1>
+<a href="index.html">Index</a>
+<h3>Tutorial: Hello Venster</h3>
+<p>
+This tutorial walks trough the classic minimal example of any software system, the famous 'HelloWorld' program.
+<p>
+<p>
+Some working knowledge of WIN32 API programming is presumed.
+</p>
+<p>
+<pre>
+ 1 from venster.windows import *
+ 2 from venster.wtl import *
+
+ 3 from venster import gdi
+
+ 4 class MyWindow(Window):
+ 5   _window_title_ = "Hello World"
+ 6   _window_background_ = gdi.GetStockObject(WHITE_BRUSH)
+ 7   _window_class_style_ = CS_HREDRAW | CS_VREDRAW
+ 8
+ 9   def OnPaint(self, event):
+10      ps = PAINTSTRUCT()
+11      hdc = self.BeginPaint(ps)
+12      rc = self.GetClientRect()
+13
+14      msg = "Hello World"
+15      gdi.TextOut(hdc, rc.width / 2, rc.height / 2, msg, len(msg))
+16
+17      self.EndPaint(ps)
+18
+19   msg_handler(WM_PAINT)(OnPaint)
+20
+21
+22   def OnDestroy(self, event):
+23       PostQuitMessage(NULL)
+24
+25   msg_handler(WM_DESTROY)(OnDestroy)
+26
+27 myWindow = MyWindow()
+28
+29 application = Application()
+30 application.Run()
+</pre>
+<p>
+<ul>
+<li><p>1 - 3 Import the core Venster modules into the script.</p></li>
+<li>
+<p>4 - 7 Defines a new Venster Window. Class attributes are used to configure properties that will be common for each instance of the Window.</p>
+<p>The property <pre>_window_background_</pre> causes the window background to be repainted in the specified color each time the window needs repainting</p>
+<p>The property <pre>_window_class_style_</pre> is used to configure the window so that each time it is resized it will be repainted</p>
+<p>The _window_* properties correspond to the parameters passed to the RegisterClassEx and CreateWindowEx WIN32 API methods that are used to create the window</p>
+</li>
+<li>
+<p>9 - 17 Defines the handler that will be called by Windows whenever the window needs repainting.</p>
+<p>GDI methods are used within the handler to draw the famous text</p>
+</li>
+<li>
+<p>19 This decorator establishes the mapping between the WM_PAINT message send by windows and the OnPaint method that we want to be called to handle it</p>
+<p>Please note that the decorator is compatible with Python 2.4 decorator syntax.
+<br/>If you are running Python 2.4, a function decorator <pre>@msg_handler(WM_PAINT)</pre> can be placed right atop of <pre>def OnPaint(...)</pre>
+instead</p>
+</li>
+<li>
+<p>22 - 25 Defines a handler that will exit the application whenever this window is destroyed.</p>
+</li>
+<li>
+<p>27 Create an instance of the window</p>
+</li>
+<li>
+<p>29 - 30 Create an application and run it</p>
+<p>The Run method contains the standard WIN32 message loop (<pre>GetMessage, TranslateMessage and DispatchMessage</pre>).
+<p>The application will stay in the Run method until the WM_QUIT message is received from Windows. This message will be send by
+the <pre>PostQuitMessage</pre> call of line 23.</p>
+</li>
+</ul>
+
+</body>

@@ -118,8 +118,8 @@ All Rights Reserved
 """
 
 class Scintilla(Window):
-    _class_ = "Scintilla"
-    _class_ws_style_ = WS_VISIBLE | WS_CHILD
+    _window_class_ = "Scintilla"
+    _window_style_ = WS_VISIBLE | WS_CHILD
 
     def __init__(self, *args, **kwargs):
         Window.__init__(self, *args, **kwargs)

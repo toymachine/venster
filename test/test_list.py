@@ -40,13 +40,16 @@ class MyList(list.List):
             self.SetColumnWidth(i, -2)
         self.SetColumnWidth(len(columnDefs) - 1, -2)
 
-        event.handled = 0
+        event.handled = False
+
+    msg_handler(WM_PAINT)(OnPaint)
 
     def OnWindowPosChanging(self, event):
-        event.handled = 0
+        event.handled = False
 
+    msg_handler(WM_WINDOWPOSCHANGED)(OnWindowPosChanging)
+    
     def OnSize(self, event):
-        
         #width = self.clientRect.width
         ShowScrollBar(self.handle, SB_HORZ, False)
         self.SetRedraw(0)
@@ -55,29 +58,25 @@ class MyList(list.List):
             self.SetColumnWidth(i, -2)
         self.SetColumnWidth(len(columnDefs) - 1, -2)
         self.SetRedraw(1)
-        
-        event.handled = 0
+        event.handled = False
 
+    msg_handler(WM_SIZE)(OnSize)
+                         
     def OnColumnClick(self, event):
         nmlv = NMLISTVIEW.from_address(int(event.lParam))
         print "column clicked!", nmlv.iSubItem
         
-    _msg_map_ = MSG_MAP([MSG_HANDLER(WM_PAINT, OnPaint),
-                         MSG_HANDLER(WM_WINDOWPOSCHANGED, OnWindowPosChanging),
-                         MSG_HANDLER(WM_SIZE, OnSize),
-                         NTF_HANDLER(LVN_COLUMNCLICK, OnColumnClick)])
+    ntf_handler(LVN_COLUMNCLICK)(OnColumnClick)
     
     
 class MyForm(form.Form):
-    _class_icon_ = blinkyIcon
-    _class_icon_sm_ = blinkyIcon
-    _class_background_ = 0
+    _window_icon_ = blinkyIcon
+    _window_icon_sm_ = blinkyIcon
+    _window_background_ = 0
 
-    _form_title_ = "Test auto column resize (NOT WORKING!)"
-    
-    def __init__(self):
-        form.Form.__init__(self)      
+    _window_title_ = "Test auto column resize (NOT WORKING!)"
 
+    def OnCreate(self, event):
         aList = MyList(parent = self, orExStyle = WS_EX_CLIENTEDGE)
         aList.InsertColumns(columnDefs)
         for i in range(100):

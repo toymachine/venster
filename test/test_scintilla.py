@@ -22,7 +22,7 @@
 copyright = \
 """
 Snakepad
-Copyright 2003 by Henk Punt <henk@entree.nl>
+Copyright 2003-2004 by Henk Punt <henk@entree.nl>
 All Rights Reserved
 """
 
@@ -67,7 +67,7 @@ class PyScintilla(scintilla.Scintilla):
         #set default style:
         self.StyleSetFore(scintilla.STYLE_DEFAULT, Black)
         self.StyleSetBack(scintilla.STYLE_DEFAULT, White)
-        self.StyleSetSize(scintilla.STYLE_DEFAULT, 9)
+        self.StyleSetSize(scintilla.STYLE_DEFAULT, 8)
         niceFont = self.GetNiceFont()
         if niceFont: self.StyleSetFont(scintilla.STYLE_DEFAULT, niceFont)
         self.SetTabWidth(4)
@@ -82,16 +82,17 @@ class PyScintilla(scintilla.Scintilla):
 
     def FontNameProc(self, lpelfe, lpntme, FontType, lParam):
         """Callback called by windows to enumerate fonts"""
-        if lpelfe.contents.elfLogFont.lfPitchAndFamily & FIXED_PITCH:
+        if lpelfe.contents.elfLogFont.lfPitchAndFamily & gdi.FIXED_PITCH:
             self.monoFonts[lpelfe.contents.elfFullName] = 1
+        return 1 #continue enumeration
         
     def GetNiceFont(self):
         """gets the name of the nicest monospace font on the system"""
         logfont = gdi.LOGFONT()
         logfont.lfCharSet = gdi.DEFAULT_CHARSET
-        logfont.lfPitchAndFamily = gdi.FIXED_PITCH
-        hdc = GetDC(0);
+        logfont.lfPitchAndFamily = 0
         self.monoFonts = {}
+        hdc = GetDC(0)
         #callback fills in self.monoFonts
         gdi.EnumFontFamiliesEx(hdc, byref(logfont), gdi.EnumFontFamExProc(self.FontNameProc), 0, 0)
         ReleaseDC(0, hdc)
@@ -99,6 +100,7 @@ class PyScintilla(scintilla.Scintilla):
             if self.monoFonts.has_key(niceFont):
                 return niceFont
         return None
+
 
 class Editor(PyScintilla):
     """A python editor based on the scintilla control"""
@@ -165,16 +167,16 @@ ID_EVAL = 8001
 CTRL_EDITOR = "editor"
 
 class MainForm(form.Form):
-    _class_icon_ = _class_icon_sm_ = Icon("CHICKEN.ICO")
+    _window_icon_ = _window_icon_sm_ = Icon("CHICKEN.ICO")
 
-    _class_accels_ = [(FCONTROL|FVIRTKEY, ord("E"), ID_EVAL),
+    _window_title_ = "Snakepad"
+
+    _form_accels_ = [(FCONTROL|FVIRTKEY, ord("E"), ID_EVAL),
                       (FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW)]
     
-    _class_form_exit_ = form.EXIT_ONLASTDESTROY
+    _form_exit_ = form.EXIT_ONLASTDESTROY
 
-    _class_form_status_msgs_ = {form.ID_NEW: "Creates a new window."}
-
-    _form_title_ = "Snakepad"
+    _form_status_msgs_ = {form.ID_NEW: "Creates a new window."}
 
     _form_menu_ = [(MF_POPUP, "&File",
                     [(MF_STRING, "&New\tCtrl+N", form.ID_NEW),
@@ -191,9 +193,7 @@ class MainForm(form.Form):
                      (MF_SEPARATOR,),
                      (MF_STRING, "Select &All\tCtrl+A", form.ID_SELECTALL)])]
                      
-    def __init__(self):
-        form.Form.__init__(self)      
-
+    def OnCreate(self, event):
         aSplitter = splitter.Splitter(parent = self,
                                       orientation = splitter.HORIZONTAL,
                                       splitPos = int(self.clientRect.height * 0.6))
@@ -209,22 +209,28 @@ class MainForm(form.Form):
         self.controls.Add(CTRL_EDITOR, aEditor)
         self.controls.Add(aConsole)
 
+
     def OnNew(self, event):
         form = MainForm()
         form.ShowWindow()
 
+    cmd_handler(form.ID_NEW)(OnNew)
+    
     editor = property(lambda self: self.controls[CTRL_EDITOR])
     
     def OnEval(self, event):
         self.console.Eval()
-        
+
+    cmd_handler(ID_EVAL)(OnEval)
+    
     def OnActivate(self, event):
         #if form is activated, set focus to editor
         if (HIWORD(event.wParam), LOWORD(event.wParam)) == (0, 1): self.editor.SetFocus()
-        
+
+    msg_handler(WM_ACTIVATE)(OnActivate)
+    
     _msg_map_ = MSG_MAP(\
-        [MSG_HANDLER(WM_ACTIVATE, OnActivate),
-         CMD_ID_HANDLER(form.ID_NEW, OnNew),
+        [
          CMD_ID_HANDLER(form.ID_UNDO,
                         lambda self, event: self.editor.Undo()),
          form.CMD_UI_UPDATE(form.ID_UNDO,
@@ -250,9 +256,7 @@ class MainForm(form.Form):
          form.CMD_UI_UPDATE(form.ID_CLEAR,
                             lambda self, event: event.Enable(self.editor.HasSelection())),
          CMD_ID_HANDLER(form.ID_SELECTALL,
-                        lambda self, event: self.editor.SelectAll()),
-         CMD_ID_HANDLER(ID_EVAL, OnEval),
-         CHAIN_MSG_MAP(form.Form._msg_map_)])
+                        lambda self, event: self.editor.SelectAll())])
 
 if __name__ == '__main__':
     mainForm = MainForm()        

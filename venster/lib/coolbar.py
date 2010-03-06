@@ -24,6 +24,10 @@ from venster.comctl import *
 
 WM_TRACK = WM_USER + 1
 
+class ToolBar(ToolBar): #add some styles to the comctl ToolBar
+    _window_style_ = ToolBar._window_style_ | CCS_NODIVIDER |\
+                     CCS_NORESIZE | CCS_NOPARENTALIGN | TBSTYLE_FLAT | TBSTYLE_LIST
+    
 class CommandBar(ToolBar):
     def __init__(self, *args, **kwargs):
         ToolBar.__init__(self, *args, **kwargs)

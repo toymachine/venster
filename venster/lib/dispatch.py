@@ -20,8 +20,6 @@
 ## WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
 from ctypes import c_wchar_p, POINTER, byref, c_uint
-#port#from ctypes.com import COMObject, CreateInstance, E_NOTIMPL, E_NOINTERFACE, S_OK, GUID
-#port#from ctypes.com.automation import *
 from comtypes import COMObject, GUID
 from comtypes.hresult import E_NOTIMPL, E_NOINTERFACE, S_OK
 from comtypes.automation import *

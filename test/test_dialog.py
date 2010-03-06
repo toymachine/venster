@@ -53,6 +53,8 @@ class ExampleDialog(Dialog):
             
         self.ctrlEditSum.SetText(c)
 
+    cmd_handler(IDC_BUTTON_SUM)(OnSum)
+
     def OnEval(self, event):
         #evaluates the line as a python expression and show the results
         try:
@@ -68,6 +70,7 @@ class ExampleDialog(Dialog):
 
         self.ctrlEditEvalRes.SetText(evalResult)
 
+    cmd_handler(IDC_EDIT_EVAL, EN_CHANGE)(OnEval)
 
     def OnInitDialog(self, event):
         Dialog.OnInitDialog(self, event)
@@ -82,10 +85,6 @@ class ExampleDialog(Dialog):
         self.ctrlEditA.SetFocus()
        
             
-    _msg_map_ = MSG_MAP([CMD_ID_HANDLER(IDC_BUTTON_SUM, OnSum),                         
-                         CMD_HANDLER(IDC_EDIT_EVAL, EN_CHANGE, OnEval),
-                         CHAIN_MSG_MAP(Dialog._msg_map_)])
-
 if __name__ == '__main__':
     dialog = ExampleDialog()
     #show the dialog and return the result:

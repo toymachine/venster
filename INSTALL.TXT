@@ -1,8 +1,6 @@
-Venster uses distutils.
-
 Venster can be installed from this directory with:
 
 python setup.py install
 
-Venster requires the ctypes library (ctypes.sourceforge.net)
+Venster requires the latest ctypes library (ctypes.sourceforge.net)
 

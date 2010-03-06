@@ -26,22 +26,22 @@ from venster.lib import form
 from venster import gdi
 
 class MyForm(form.Form):
-    _class_icon_ = Icon("blinky.ico")
-    _class_icon_sm_ = _class_icon_
-    _class_background_ = 0 #prevents windows from redrawing background, prevent flicker
-    _class_style_ = CS_HREDRAW | CS_VREDRAW#make windows invalidate window on resize
+    _window_icon_ = Icon("blinky.ico")
+    _window_icon_sm_ = _window_icon_
+    _window_background_ = 0 #prevents windows from redrawing background, prevent flicker
+    _window_class_style_ = CS_HREDRAW | CS_VREDRAW#make windows invalidate window on resize
 
-    _form_title_ = "Real Slick Looking Windows Application in 100% Python"
+    _window_title_ = "Real Slick Looking Windows Application in 100% Python"
     
     def __init__(self):
         form.Form.__init__(self)      
 
         #find some bitmap to show:
         try:
-            self.bitmap = Bitmap("test.bmp")
+            self.bitmap = gdi.Bitmap("test.bmp")
         except:
             try:
-                self.bitmap = Bitmap("c:\\Windows\\Web\\Wallpaper\\Bliss.bmp")
+                self.bitmap = gdi.Bitmap("c:\\Windows\\Web\\Wallpaper\\Bliss.bmp")
             except:
                 print "put a bitmap file 'test.bmp' in the current directory"
                 import os
@@ -50,7 +50,7 @@ class MyForm(form.Form):
         #create a memory dc containing the bitmap
         self.bitmapdc = gdi.CreateCompatibleDC(NULL)
         gdi.SelectObject(self.bitmapdc, self.bitmap.handle)
-        
+
     def OnPaint(self, event):
         ps = PAINTSTRUCT()
         hdc = self.BeginPaint(ps)
@@ -64,8 +64,7 @@ class MyForm(form.Form):
         
         self.EndPaint(ps)
 
-    _msg_map_ = MSG_MAP([MSG_HANDLER(WM_PAINT, OnPaint),
-                         CHAIN_MSG_MAP(form.Form._msg_map_)])
+    msg_handler(WM_PAINT)(OnPaint)
     
 if __name__ == '__main__':
     mainForm = MyForm()        

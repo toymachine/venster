@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name="Venster",
-      version="0.63",
+      version="0.7",
       description="Venster Windows GUI toolkit",
       author="Henk Punt",
       author_email="henk@entree.nl",

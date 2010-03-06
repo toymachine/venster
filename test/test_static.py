@@ -26,8 +26,8 @@ from venster.atl import *
 from venster.lib import form
 
 class Static(Window):
-    _class_ = 'static'
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE
+    _window_class_ = 'static'
+    _window_style_ = WS_CHILD | WS_VISIBLE
     
 class MyForm(form.Form):
     def __init__(self):

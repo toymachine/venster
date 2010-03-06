@@ -1,0 +1,14 @@
+This folder contains an example on how to build a Venster application
+as a complete standalone windows application.
+The venster application 'sampleapp.py' will be distributed as an .exe
+by using py2exe (http://starship.python.net/crew/theller/py2exe/).
+The installer will be created by using NSIS (http://nsis.sourceforge.net/).
+
+Steps:
+1. Make sure that you have installed venster and ctypes
+2. Install py2exe and NSIS 
+3. Update the make.bat file in this directory if you have changed the default installed location of NSIS
+4. Run the make.bat file in this folder
+5. The sampleapp.installer.exe has been created.
+
+

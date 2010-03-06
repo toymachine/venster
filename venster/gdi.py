@@ -21,6 +21,7 @@
 
 from ctypes import *
 from windows import *
+from wtl import *
 
 class BITMAP(Structure):
     _fields_ = [("bmType", LONG),
@@ -62,6 +63,37 @@ class ENUMLOGFONTEX(Structure):
 
 EnumFontFamExProc = WINFUNCTYPE(c_int, POINTER(ENUMLOGFONTEX), POINTER(DWORD), DWORD, LPARAM)    
 
+class BITMAPINFOHEADER(Structure):
+    _fields_ = [("biSize",  DWORD),
+                ("biWidth",   LONG),
+                ("biHeight",   LONG),
+                ("biPlanes",   WORD),
+                ("biBitCount",   WORD),
+                ("biCompression",  DWORD),
+                ("biSizeImage",  DWORD),
+                ("biXPelsPerMeter",   LONG),
+                ("biYPelsPerMeter",   LONG),
+                ("biClrUsed",  DWORD),
+                ("biClrImportant",  DWORD)]
+
+class RGBQUAD(Structure):
+  _fields_ = [("rgbBlue",    BYTE),
+              ("rgbGreen",    BYTE),
+              ("rgbRed",    BYTE),
+              ("rgbReserved",    BYTE)]
+
+class BITMAPINFO(Structure):
+    _fields_ = [("bmiHeader", BITMAPINFOHEADER),
+                ("bmiColors", RGBQUAD)]
+
+class BITMAPFILEHEADER(Structure):
+    _fields_ = [
+        ("bfType",    WORD),
+        ("bfSize",   DWORD),
+        ("bfReserved1",    WORD),
+        ("bfReserved2",    WORD),
+        ("bfOffBits",   DWORD)]
+    
 MONO_FONT = 8
 OBJ_FONT = 6
 ANSI_FIXED_FONT  = 11
@@ -134,13 +166,24 @@ BS_DIBPATTERN = 5
 BS_DIBPATTERNPT =       6
 BS_PATTERN8X8 = 7
 BS_DIBPATTERN8X8 =      8
- 
+
+BI_RGB        =0
+BI_RLE8       =1
+BI_RLE4       =2
+BI_BITFIELDS  =3
+BI_JPEG       =4
+BI_PNG        =5
+
+DIB_RGB_COLORS   =   0
+DIB_PAL_COLORS   =   1
+
 GetStockObject = windll.gdi32.GetStockObject
 LineTo = windll.gdi32.LineTo
 MoveToEx = windll.gdi32.MoveToEx
 FillRect = windll.user32.FillRect
 DrawEdge = windll.user32.DrawEdge
 CreateCompatibleDC = windll.gdi32.CreateCompatibleDC
+CreateCompatibleBitmap = windll.gdi32.CreateCompatibleBitmap
 CreateCompatibleDC.restype = ValidHandle
 SelectObject = windll.gdi32.SelectObject
 GetObject = windll.gdi32.GetObjectA
@@ -159,5 +202,75 @@ InvertRect = windll.user32.InvertRect
 DrawFocusRect = windll.user32.DrawFocusRect
 ExtCreatePen = windll.gdi32.ExtCreatePen
 CreatePen = windll.gdi32.CreatePen
+DrawText = windll.user32.DrawTextA
+TextOut = windll.gdi32.TextOutA
+CreateDIBSection = windll.gdi32.CreateDIBSection
+DeleteDC = windll.gdi32.DeleteDC
+GetDIBits = windll.gdi32.GetDIBits
 
+class Bitmap(WindowsObject):
+    __dispose__ = DeleteObject
+
+    def __init__(self, path):
+        WindowsObject.__init__(self, LoadImage(NULL, path, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE))
+        bm = BITMAP()
+        GetObject(self.handle, sizeof(bm), byref(bm))
+        self.m_width, self.m_height = bm.bmWidth, bm.bmHeight
+
+    def getWidth(self):
+        return self.m_width
+
+    width = property(getWidth, None, None, "")
+    
+    def getHeight(self):
+        return self.m_height
+
+    height = property(getHeight, None, None, "")
+        
+
+
+#TODO refactor into Brush class with static factory class methods
+class SolidBrush(WindowsObject):
+    __dispose__ = DeleteObject
+
+    def __init__(self, colorRef):
+        WindowsObject.__init__(self, CreateSolidBrush(colorRef))
+        
+class Pen(WindowsObject):
+    __dispose__ = DeleteObject
+
+    def Create(cls, fnPenStyle = PS_SOLID,  nWidth = 1, crColor = 0x00000000):
+        return Pen(CreatePen(fnPenStyle, nWidth, crColor))
+
+    Create = classmethod(Create)
+    
+    def CreateEx(cls, dwPenStyle = PS_COSMETIC | PS_SOLID, dwWidth = 1, lbStyle = BS_SOLID,
+                 lbColor = 0x00000000, lbHatch = 0,
+                 dwStyleCount = 0, lpStyle = 0):
+        lb = LOGBRUSH(lbStyle, lbColor, lbHatch)
+        return Pen(ExtCreatePen(dwPenStyle, dwWidth, byref(lb), dwStyleCount, lpStyle))
+
+    CreateEx  = classmethod(CreateEx)
+    
+
+class Font(WindowsObject):
+    __dispose__ = DeleteObject
+
+    def __init__(self, **kwargs):
+        #TODO move these kwargs to init, use default values
+        hfont = CreateFont(kwargs.get('height', 0),
+                           kwargs.get('width', 0),
+                           kwargs.get('escapement', 0),
+                           kwargs.get('orientation', 0),
+                           kwargs.get('weight', 0),
+                           kwargs.get('italic', 0),
+                           kwargs.get('underline', 0),
+                           kwargs.get('strikeout', 0),
+                           kwargs.get('charset', ANSI_CHARSET),
+                           kwargs.get('outputPrecision', OUT_DEFAULT_PRECIS),
+                           kwargs.get('clipPrecision', CLIP_DEFAULT_PRECIS),
+                           kwargs.get('quality', DEFAULT_QUALITY),
+                           kwargs.get('pitchAndFamily', DEFAULT_PITCH|FF_DONTCARE),
+                           kwargs.get('face', ""))
+        WindowsObject.__init__(self, hfont)
 

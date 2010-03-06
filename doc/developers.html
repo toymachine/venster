@@ -7,50 +7,49 @@
 <h1>&nbsp;Venster</h1>
 <a href="index.html">Index</a>
 <h3>Design</h3>
-<p>Abstracts some of the more anoying details of the win32 API. (but not all):<p>
+<p>Venster abstracts some of the more anoying details of the win32 API.:<p>
 <ol>
-<li><p>The mapping from Win32 handles to real python instances of
-	  a python Window class.</p><p>The abstraction is not 100%. Window messages are connected
-to python methods trough the use of MSG_MAPS.</p>
-	  I don't mind working with Msg Maps. If you would abstract these away
-	  using some elaborate signal/slot/listener/bla mechanism, 10 to 1 that someday (sooner
-	  rather than later) you would still have to deal with the gory details of Global Wnd Procs
-	  and such anyway. 
-	  
-	  This is mostly implemented by using a global python dict which maps between HWNDS and 
-instances
-		(changed to WeakDict)
+<li><p>Win32 Windows (identified by their HWND handle) are mapped to real python instances of
+	  a python Window class. This is mostly implemented by using a global python dict which maps between the HWNDS and
+the python Window instances.
+</p>
 
-	  Msg cracking/routing is now handled trough a MSG_MAP class, different type of 'handlers'
-	  are defined for processing Notification msgs, Command msg and normal WM_* msgs</p></li>
+	  <p>Window messages are connected
+to python methods trough the use of MSG_MAPS (just as with ATL/WTL/MFC).</p>
+
+
+	<p>
+	  Msg cracking/routing is handled trough a MSG_MAP class, different type of 'handlers'
+	  are defined for processing the various msgs types (WM_*, Command messages and Notication messages).
+	  </p></li>
 
 <li><p>
-	  Garbage collection. Most windows widgets (windows, menus, etc etc) have some CreateXXX
+	  Garbage collection. Most windows objects (windows, menus, etc etc) have some CreateXXX
 	  method and some special DestroyXXX method.
-	  I would like these to be called automatically by the framework.
-	  
-	  This is not implemented yet, I've made a 'disposable' base class of which all things
-	  with handles are derived. All derived classes implement a __dispose__(self) method
+	  These are called automatically by the framework when the python 'peer' instances of the windows object becomes garbage.
+	  All python windows classes implement a __dispose__(self) method
 	  which calls the apropriate windows DestroyXXX function to release the handle.
 </p></li>
-	  
-	  
+
+
 <li><p>
-	  Automatic Layout management. This is really lacking in the Windows API. It would be nice
-	  to have. (see Swing for Java, it really works there).	  </p></li>
-	   
+	  Automatic Layout management (not implemented yet). This is really lacking in the Windows API. It would be nice
+	  to have something like this. (see Swing for Java, it really works there).	  </p></li>
+
 </ol>
 
 <p>Bases on the above a small library of more 'high level' controls is being developed. These controls
 go beyond what the standard windows controls provide. in order to make them a little bit more 'pythonic'</p>
- 
+
 
 <h3>Source layout</h3>
 <p>The top level package 'venster' contains the low level windows abstractions:</p>
 <el>
 <li><span class="cmd">windows.py</span> Contains windows constants and functions from user32.dll, the main windows gui library</li>
-<li><span class="cmd">wtl.py</span> Contains the main Venster abstraction of 'Window', maps between  python Windows and Win32 HANDLE's. This module also implements Message cracking/routing, defines handlers for normal WM_* msgs, WM_NOTIFY notification messages and WM_COMMAND msgs. Also contains basic specialisations of Window for 'Menu', 'Bitmap', 'Icon' and 'Font'</li>
-<li><span class="cmd">comdlg.py</span> Common Controls base library, based on wtl.py Window abstraction. Wraps the standard windows Common Controls (TreeView, ListView etc)</li>
+<li><span class="cmd">wtl_core.py</span> Contains the main Venster abstraction of a 'Window', maps between  python Windows and Win32 HANDLE's. This module also implements Message cracking/routing, defines handlers for normal WM_* msgs, WM_NOTIFY notification messages and WM_COMMAND msgs.</li>
+<li><span class="cmd">wtl.py</span>Extends the Venster abstraction of a 'Window', introduces a lot of convenient methods that are often used to manipulate windows. Also contains basic Windows objects like 'Menu', 'Icon'</li>
+<li><span class="cmd">gdi.py</span>Constants and structures from the windows GDI. introduces some wrappers for things like Bitmaps and Fonts.</li>
+<li><span class="cmd">comctl.py</span> Common Controls base library, based on wtl.py Window abstraction. Wraps the standard windows Common Controls (TreeView, ListView etc)</li>
 
 </el>
 <p>The 'venster.lib' package contains the more high level stuff:</p

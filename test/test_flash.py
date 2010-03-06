@@ -28,11 +28,11 @@ from venster.lib import form
 from ctypes import *
 from comtypes.client import GetEvents, ShowEvents, wrap
 
+import flash
+
 class FlashWindow(atl.AxWindow):
     def __init__(self, *args, **kwargs):
-        atl.AxWindow.__init__(self,
-                              "ShockwaveFlash.ShockwaveFlash",
-                              *args, **kwargs)
+        atl.AxWindow.__init__(self, flash.ShockwaveFlash._reg_clsid_, *args, **kwargs)
 
         pUnk = self.GetControl()
         #get the Flash interface of the control
@@ -57,12 +57,11 @@ class FlashWindow(atl.AxWindow):
 
         
 class MyForm(form.Form):
-    _class_icon_ = _class_icon_sm_ = Icon("COW.ICO")
+    _window_icon_ = _window_icon_sm_ = Icon("COW.ICO")
     
-    _form_title_ = "Venster Flash Player"
+    _window_title_ = "Venster Flash Player"
     
-    def __init__(self):
-        form.Form.__init__(self)
+    def OnCreate(self, event):
         self.controls.Add(form.CTRL_VIEW, FlashWindow(parent = self))
 
 if __name__ == '__main__':

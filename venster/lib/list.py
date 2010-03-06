@@ -33,48 +33,60 @@ class List(ListView):
         self.m_interceptor.dispose()
         del self.m_interceptor
         
-    def InsertColumns(self, colDef):
+    def InsertColumns(self, colDefs):
         """inserts columns into list view, based on colDef
         colDef is a list of tuples (title, width)"""
         col = LVCOLUMN()
         i = 0
-        for title, width in colDef:
+        for colDef in colDefs:
+            title, width = colDef[:2]
             col.clear()
             col.text = title
             col.width = width
+            if len(colDef) == 3:
+                fmt = colDef[2]
+                col.format = fmt
             self.InsertColumn(i, col)
             i += 1
 
-    def SetColumns(self, colDef):
+    def SetColumns(self, colDefs):
         col = LVCOLUMN()
         i = 0
-        for title, width in colDef:
+        for colDef in colDefs:
+            title, width = colDef[:2]
             col.clear()
             col.text = title
             col.width = width
+            if len(colDef) == 3:
+                fmt = colDef[2]
+                col.format = fmt
             self.SetColumn(i, col)
             i += 1
 
-    def InsertRow(self, i, row):
+    def InsertRow(self, i, row, lParam = 0):
         """inserts a row at index i, row is a list of strings"""
         item = LVITEM()
+        item.mask = LVIF_TEXT | LVIF_PARAM
         item.iItem = i
+        item.lParam = lParam
         item.iSubItem = 0
-        item.text = row[0]
+        item.pszText = row[0]
         self.InsertItem(item)
-        
+        #if i was -1, iItem wil now contain the index at which the row was inserted
         for iSubItem in range(len(row) - 1):
+            item.mask = LVIF_TEXT
             item.iSubItem = iSubItem + 1
-            item.text = row[iSubItem + 1]
+            item.pszText = row[iSubItem + 1]
             self.SetItem(item)
 
     def SetRow(self, i, row):
         """sets the row at index i, row is a list of strings"""
         item = LVITEM()
+        item.mask = LVIF_TEXT
         item.iItem = i
         for iSubItem in range(len(row)):
             item.iSubItem = iSubItem
-            item.text = row[iSubItem]
+            item.pszText = row[iSubItem]
             self.SetItem(item)
         
     def SelectAll(self):

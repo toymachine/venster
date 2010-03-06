@@ -1,4 +1,4 @@
-DISTNO = venster-0.63
+DISTNO = venster-0.72
 
 dist: clean
 	python setup.py bdist_wininst
@@ -12,7 +12,8 @@ src_dist: clean
 	rm -rf ../${DISTNO}
 
 clean:
-	find -name *~ -exec rm -rf {} \;	
+	find -name '*~' -exec rm -rf {} \;	
+	find -name '#*#' -exec rm -rf {} \;	
 	find -name *.pyc -exec rm -rf {} \;
 	find -name *.patch -exec rm -rf {} \;
 	rm -rf dist
@@ -21,9 +22,13 @@ clean:
 	cd test; rm -rf dist
 	cd doc; rm -rf api
 	cd test/resdll/Release; rm -rf *.res
+	cd samples/app; rm -rf build
+	cd samples/app; rm -rf dist
+	cd samples/app; rm -rf sampleapp.installer.exe
+
 
 clean_cvs:
-	find -name CVS -exec rm -rf {} \;
+	find -name '.svn' -exec rm -rf {} \;
 
 doc:
 	python make_doc.py 

@@ -29,8 +29,8 @@ AtlAxGetControl = windll.atl.AtlAxGetControl
 from comtypes import IUnknown
 
 class AxWindow(wtl.Window):
-    _class_ = "AtlAxWin"
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
+    _window_class_ = "AtlAxWin"
+    _window_style_ = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
     
     def __init__(self, ctrlId, *args, **kwargs):
         """ctrlId can be progId, clsId or url"""

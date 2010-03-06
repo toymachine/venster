@@ -26,9 +26,9 @@ from venster import comctl
 from venster import gdi
 
 class NoteBook(comctl.TabControl):
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS
-    _class_ws_ex_style_ = 0
-    _class_background_ = 0
+    _window_style_ = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS
+    _window_style_ex_ = 0
+    _window_background_ = 0
     
     def __init__(self, *args, **kwargs):
         comctl.TabControl.__init__(self, *args, **kwargs)

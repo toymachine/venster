@@ -44,22 +44,48 @@ HCURSOR = HANDLE
 HBRUSH = HANDLE
 HMENU = HANDLE
 HBITMAP = HANDLE
+HIMAGELIST = HANDLE
+HGDIOBJ = HANDLE
+HMETAFILE = HANDLE
+
 ULONG = DWORD
 ULONG_PTR = DWORD
+UINT_PTR = DWORD
+LONG_PTR = DWORD
 INT = c_int
 LPCTSTR = c_char_p
 LPTSTR = c_char_p
+PSTR = c_char_p
+LPCSTR = c_char_p
+LPCWSTR = c_wchar_p
+LPSTR = c_char_p
+LPWSTR = c_wchar_p
+PVOID = c_void_p
+USHORT = c_ushort
 WORD = c_ushort
+ATOM = WORD
+SHORT = c_short
 LPARAM = c_ulong
 WPARAM = c_uint
 LPVOID = c_voidp
 LONG = c_long
 BYTE = c_byte
-TCHAR = c_char
+TCHAR = c_char #TODO depends on unicode/wide conventions
 DWORD_PTR = c_ulong #TODO what is this exactly?
 INT_PTR = c_ulong  #TODO what is this exactly?
 COLORREF = c_ulong
 CLIPFORMAT = WORD
+FLOAT = c_float
+CHAR = c_char
+WCHAR = c_wchar
+
+FXPT16DOT16 = c_long
+FXPT2DOT30 = c_long
+LCSCSTYPE = c_long
+LCSGAMUTMATCH = c_long
+COLOR16 = USHORT
+
+LRESULT = LONG_PTR
 
 #### Windows version detection ##############################
 class OSVERSIONINFO(Structure):
@@ -86,7 +112,8 @@ MAKELPARAM = MAKELONG
 def RGB(r,g,b):
     return r | (g<<8) | (b<<16)
 
-WndProc = WINFUNCTYPE(c_int, HWND, UINT, WPARAM, LPARAM)
+##### Windows Callback functions ################################
+WNDPROC = WINFUNCTYPE(c_int, HWND, UINT, WPARAM, LPARAM)
 DialogProc = WINFUNCTYPE(c_int, HWND, UINT, WPARAM, LPARAM)
 
 CBTProc = WINFUNCTYPE(c_int, c_int, c_int, c_int)
@@ -94,10 +121,12 @@ MessageProc = CBTProc
 
 EnumChildProc = WINFUNCTYPE(c_int, HWND, LPARAM)
 
+MSGBOXCALLBACK = WINFUNCTYPE(c_int, HWND, LPARAM) #TODO look up real def
+
 class WNDCLASSEX(Structure):
     _fields_ = [("cbSize", UINT),
                 ("style",  UINT),
-                ("lpfnWndProc", WndProc),
+                ("lpfnWndProc", WNDPROC),
                 ("cbClsExtra", INT),
                 ("cbWndExtra", INT),
                 ("hInstance", HINSTANCE),
@@ -117,6 +146,10 @@ class POINT(Structure):
 
 POINTL = POINT
 
+class POINTS(Structure):
+    _fields_ = [("x", SHORT),
+                ("y", SHORT)]
+    
 
 PtInRect = windll.user32.PtInRect
 
@@ -151,7 +184,13 @@ class RECT(Structure):
         """
         return bool(PtInRect(byref(self), pt))
         
+RECTL = RECT        
+
+class SIZE(Structure):
+    _fields_ = [('cx', LONG),
+                ('cy', LONG)]
         
+SIZEL = SIZE        
         
     
 ##class MSG(Structure):
@@ -242,6 +281,12 @@ class DLGITEMTEMPLATE(Structure):
         ("id", WORD)
     ]
 
+class COPYDATASTRUCT(Structure):
+    _fields_ = [
+        ("dwData", ULONG_PTR),
+        ("cbData", DWORD),
+        ("lpData", PVOID)]
+    
 def LOWORD(dword):
     return dword & 0x0000ffff
 
@@ -253,12 +298,15 @@ FALSE = 0
 NULL = 0
 
 IDI_APPLICATION = 32512
+
 SW_SHOW = 5
+SW_SHOWNORMAL = 1
 SW_HIDE = 0
 
 EN_CHANGE = 768
 
-MSGS = [('WM_CREATE', 1),
+MSGS = [('WM_NULL', 0),
+        ('WM_CREATE', 1),
         ('WM_CANCELMODE', 31),
         ('WM_CAPTURECHANGED', 533),
         ('WM_CLOSE', 16),
@@ -312,7 +360,10 @@ MSGS = [('WM_CREATE', 1),
         ('WM_CTLCOLORLISTBOX', 308),
         ('WM_CTLCOLORMSGBOX', 306),
         ('WM_CTLCOLORSCROLLBAR', 311),
-        ('WM_CTLCOLORSTATIC', 312)
+        ('WM_CTLCOLORSTATIC', 312),
+        ('WM_TIMER', 0x0113),
+        ('WM_CONTEXTMENU', 0x007B),
+        ('WM_COPYDATA', 0x004A)
         ]
 
 #insert wm_* msgs as constants in this module:
@@ -712,6 +763,11 @@ CP_ACP = 0
 DS_SETFONT = 0x40
 DS_MODALFRAME = 0x80
 
+SYNCHRONIZE  = (0x00100000L)
+STANDARD_RIGHTS_REQUIRED = (0x000F0000L)
+EVENT_ALL_ACCESS = (STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE|0x3)
+MAX_PATH = 260
+
 def GET_XY_LPARAM(lParam):
     x = LOWORD(lParam)
     if x > 32768:
@@ -862,3 +918,17 @@ CreateDialogIndirectParam = windll.user32.CreateDialogIndirectParamA
 DialogBoxIndirectParam = windll.user32.DialogBoxIndirectParamA
 EnumChildWindows = windll.user32.EnumChildWindows
 GetMenu = windll.user32.GetMenu
+
+SetTimer = windll.user32.SetTimer
+KillTimer = windll.user32.KillTimer
+
+IsWindowVisible = windll.user32.IsWindowVisible
+IsIconic = windll.user32.IsIconic
+GetCursorPos = windll.user32.GetCursorPos
+SetForegroundWindow = windll.user32.SetForegroundWindow
+SetMenuDefaultItem = windll.user32.SetMenuDefaultItem
+GetClassInfo = windll.user32.GetClassInfoA
+
+OpenEvent = windll.kernel32.OpenEventA
+CreateEvent = windll.kernel32.CreateEventA
+LockWindowUpdate = windll.user32.LockWindowUpdate

@@ -36,11 +36,9 @@ def createTestChild(parent):
     return lst
 
 class MyForm(form.Form):
-    _form_title_ = "Splitter Wnd test"
+    _window_title_ = "Splitter Window Test"
     
-    def __init__(self):
-        form.Form.__init__(self)      
-
+    def OnCreate(self, event):
         aSplitter1 = splitter.Splitter(parent = self,
                                        splitPos = self.clientRect.width / 2)
 

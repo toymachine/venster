@@ -26,7 +26,7 @@ from types import IntType, LongType
 from ctypes import *
 
 from venster.windows import *
-from venster.wtl import *
+from venster.wtl_core import *
 from venster import comctl
 
 memcpy = cdll.msvcrt.memcpy
@@ -70,9 +70,9 @@ class StringOrOrd:
 
 class DialogTemplate(WindowsObject):
     __dispose__ = GlobalFree
-    _class_ = None
-    _class_ws_style_ = WS_CHILD
-    _class_ws_ex_style_ = 0
+    _window_class_ = None
+    _window_style_ = WS_CHILD
+    _window_style_ex_ = 0
     _class_font_size_ = 8
     _class_font_name_ = "MS Sans Serif" 
 
@@ -95,16 +95,16 @@ class DialogTemplate(WindowsObject):
         if wclass is not None:
             wclass = StringOrOrd(wclass)
         else:
-            wclass = StringOrOrd(self._class_)
+            wclass = StringOrOrd(self._window_class_)
 
         title = StringOrOrd(title)
         menu = StringOrOrd(menu)
 
         if style is None:
-            style = self._class_ws_style_
+            style = self._window_style_
 
         if exStyle is None:
-            exStyle = self._class_ws_ex_style_
+            exStyle = self._window_style_ex_
 
         if orStyle:
             style |= orStyle
@@ -209,9 +209,9 @@ class DialogTemplate(WindowsObject):
 
 
 class DialogItemTemplate(object):
-    _class_ = None
-    _class_ws_style_ = WS_CHILD|WS_VISIBLE
-    _class_ws_ex_style_ = 0
+    _window_class_ = None
+    _window_style_ = WS_CHILD|WS_VISIBLE
+    _window_style_ex_ = 0
 
     def __init__(self,
                  wclass = None,    # the window class
@@ -226,21 +226,21 @@ class DialogItemTemplate(object):
                  nandExStyle = None):
 
 
-        if not self._class_ and not wclass:
+        if not self._window_class_ and not wclass:
             raise ValueError("A window class must be specified")
 
         if wclass is not None:
             wclass = StringOrOrd(wclass)
         else:
-            wclass = StringOrOrd(self._class_)
+            wclass = StringOrOrd(self._window_class_)
 
         title = StringOrOrd(title)
 
         if style is None:
-            style = self._class_ws_style_
+            style = self._window_style_
 
         if exStyle is None:
-            exStyle = self._class_ws_ex_style_
+            exStyle = self._window_style_ex_
 
         if orStyle:
             style |= orStyle
@@ -302,26 +302,26 @@ class DialogItemTemplate(object):
         return sizeof(self.value)
 
 class PushButton(DialogItemTemplate):
-    _class_ = PUSHBUTTON
-    _class_ws_style_ = WS_CHILD|WS_VISIBLE|WS_TABSTOP
+    _window_class_ = PUSHBUTTON
+    _window_style_ = WS_CHILD|WS_VISIBLE|WS_TABSTOP
 
 class DefPushButton(DialogItemTemplate):
-    _class_ = PUSHBUTTON
-    _class_ws_style_ = WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_DEFPUSHBUTTON
+    _window_class_ = PUSHBUTTON
+    _window_style_ = WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_DEFPUSHBUTTON
 
 class GroupBox(DialogItemTemplate):
-    _class_ = PUSHBUTTON
-    _class_ws_style_ = WS_CHILD|WS_VISIBLE|BS_GROUPBOX
+    _window_class_ = PUSHBUTTON
+    _window_style_ = WS_CHILD|WS_VISIBLE|BS_GROUPBOX
 
 class EditText(DialogItemTemplate):
-    _class_ = EDITTEXT
-    _class_ws_style_ = WS_CHILD|WS_VISIBLE|WS_BORDER|WS_TABSTOP
+    _window_class_ = EDITTEXT
+    _window_style_ = WS_CHILD|WS_VISIBLE|WS_BORDER|WS_TABSTOP
 
 class StaticText(DialogItemTemplate):
-    _class_ = LTEXT
-    _class_ws_style_ = WS_CHILD|WS_VISIBLE|WS_GROUP
+    _window_class_ = LTEXT
+    _window_style_ = WS_CHILD|WS_VISIBLE|WS_GROUP
 
-class Dialog(WindowBase):
+class Dialog(Window):
     """supports _dialog_id_ and _dialog_module_ class properties or
     use _dialog_template_"""
     _dialog_template_ = None
@@ -382,8 +382,6 @@ class Dialog(WindowBase):
         self.m_handle = event.handle
         if self.center: self.CenterWindow()
         return 0
-
-    handle = property(lambda self: self.m_handle)
 
     _msg_map_ = MSG_MAP([MSG_HANDLER(WM_INITDIALOG, OnInitDialog),
                          CMD_ID_HANDLER(IDOK, OnOK),

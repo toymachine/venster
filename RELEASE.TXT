@@ -1,0 +1,51 @@
+release 0.72
+
+- updated tests to not use msg maps
+- updated tests to include new style event handlers
+- fixed bug in menu popup handler, now correctly enables/disables menus
+- finished sampleapp
+- added msg debugging support, added chain_msg_map back in for legacy support (still deprecated)
+- fixed bugs, modified setting of coolbar/toolbar styles
+- added setitemcount to listview
+- refactored menu creation in form library
+- implemented some more general window methods (IsIconic, IsWindowVisible)
+- added shell module and tray icon library
+- fixed window menu bug
+- added supported for default menu's
+- added tray icon support
+- setting _window_class on a window no longer automatically assumes this is 
+an existing window class that needs subclassing, instead it checks if the window 
+class exists, ifso the new window will be subclassed.
+otherwise a new windowclass will be created with the given name.
+If no window class is given wtl will still generate a window class name itself
+- LVITEM is no longer a MaskedStructure (which will be phased out)
+- fixed menu builder bug
+- addded item notification structure to comctl
+- added nice helper method to Event to get event structure for notification
+- added some more bitmap structures/constants/methods
+- added tray icon example script (test_tray.py)
+- Application now has Quit method to post WM_QUIT and exit the application
+
+release 0.7
+
+- fixed creation process, venster windows can now process WM_CREATE messages during window creation.
+- refactored gdi stuff out of wtl.py
+- refactored wtl.py, split into core functionality (wtl_core.py) extra function are added by decorators in wtl.py
+
+- removed CHAINED msg maps. events now automatically bubble up to the parent class msg handlers
+
+- THE BIG ONE: added function decorators for building the MSG_MAP (supports 2.4 decorator syntax)
+	
+	for most code, MSG_MAPS are now obsolete.
+	use one of the new decorators 'msg_handler', 'cmd_handler' or 'ntf_handler' to map python handlers to windows events.
+	for an example see test_decorator.py
+	decorators work for python 2.3 and 2.4 but only 2.4 can use the '@' decorator syntax.
+	
+	please note that MSG_MAPS are still available in, you should however not normally need them anymore.
+	
+- WARNING! sanatized the class variable names used by Window and Form. This change is not backwards compatible, and you will 
+probably need to update your code to use the new names.
+
+- integrated patches. (mostly bug fixes and some more control wrapping).
+
+- updated documentation (added a tutorial/hello world example).

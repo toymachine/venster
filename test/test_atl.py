@@ -24,20 +24,14 @@ from venster import wtl
 from venster.lib import form
 
 class MyForm(form.Form):
-    _form_title_ = "ATL ActiveX control test"
+    _window_title_ = "ATL ActiveX control test"
     
-    def __init__(self):
-        form.Form.__init__(self)      
-
+    def OnCreate(self, event):
         #instantiates Windows Media Player by ProgId
         aControl = atl.AxWindow("WMPlayer.OCX", parent = self)
-        
-        self.controls.Add(form.CTRL_VIEW, aControl)
-
+        self.controls[form.CTRL_VIEW] = aControl
         
 if __name__ == '__main__':
     mainForm = MyForm()        
-    mainForm.ShowWindow()
-
     application = wtl.Application()
     application.Run()

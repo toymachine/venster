@@ -82,8 +82,9 @@ class Tree(tree.Tree):
         self.SetRedraw(1)
 
     def OnItemExpanding(self, event):
-        nmtv = comctl.NMTREEVIEW.from_address(int(event.lParam))
-        if nmtv.action == comctl.TVE_EXPAND:            
+        nmtv = event.structure(comctl.NMTREEVIEW)
+        if nmtv.action == comctl.TVE_EXPAND:
+            print "Expand"
             for i in range(100):
                 ti = TestItem()
                 item = comctl.TVITEMEX()
@@ -94,15 +95,15 @@ class Tree(tree.Tree):
                 item.param = as_pointer(ti)
                 self.InsertItem(self.hRoot, comctl.TVI_LAST, item)
         elif nmtv.action == comctl.TVE_COLLAPSE:
+            print "Collapse"
             self.CollapseAndReset(nmtv.itemNew.hItem)
 
     def OnSelectionChanged(self, event):
-        #print "on sel changed"
-        nmtv = comctl.NMTREEVIEW.from_address(int(event.lParam))
+        nmtv = event.structure(comctl.NMTREEVIEW)
 
     def OnDeleteItem(self, event):
         #print "del item"
-        nmtv = comctl.NMTREEVIEW.from_address(int(event.lParam))
+        nmtv = event.structure(comctl.NMTREEVIEW)
         i = nmtv.itemOld.lParam
         if i != 0:
             ti = from_pointer(i)
@@ -113,12 +114,11 @@ class Tree(tree.Tree):
                          NTF_HANDLER(comctl.TVN_DELETEITEM, OnDeleteItem)])
 
 class MyForm(form.Form):
-    _class_icon_ = blinkyIcon
-    _class_icon_sm_ = blinkyIcon
-    _form_title_ = "Tree Test (Puts references to Python instances in treenodes)"
+    _window_icon_ = blinkyIcon
+    _window_icon_sm_ = blinkyIcon
+    _window_title_ = "Tree Test (Puts references to Python instances in treenodes)"
     
-    def __init__(self):
-        form.Form.__init__(self)      
+    def OnCreate(self, event):
         self.controls.Add(form.CTRL_VIEW, Tree(parent = self, orExStyle = WS_EX_CLIENTEDGE))
 
 if __name__ == '__main__':

@@ -22,6 +22,9 @@
 from venster.windows import *
 from venster.wtl import *
 from venster import comctl
+from venster import gdi
+
+import menu
 
 #determines form destroy policy:
 EXIT_NONE = 0
@@ -66,46 +69,46 @@ class Controls(dict):
             ctrl.dispose()
         self.clear()
 
+    def __getattr__(self, key):
+        if self.has_key(key):
+            return self[key]
+        else:
+            return dict.__getattr__(key)
+        
 class Form(Window):
     """A class representing an applications main window. This class
     supports accelerators, automatic closing of the application with
     simple window management
     For status bar support make sure you have a statusBar property in
-    your derived Form and provide _class_form_status_msgs_ to enable
+    your derived Form and provide _form_status_msgs_ to enable
     help msgs on the statusbar.
     A single child view is supported and it must be available in the
     derived class as 'view' property.
     """
     
-    _class_ws_style = WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_OVERLAPPED
-    _class_ws_ex_style_ = WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | \
-                          WS_EX_WINDOWEDGE | WS_EX_APPWINDOW
+    _window_style_ex_ = WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR | \
+                        WS_EX_WINDOWEDGE | WS_EX_APPWINDOW
 
-    _class_background_ = 0
-    _class_accels_ = []
-    _haccel_ = 0
+    _window_background_ = gdi.GetStockObject(WHITE_BRUSH)
+    _form_accels_ = []
 
-    _class_form_exit_ = EXIT_ONDESTROY
-    _class_form_count_ = 0
-    _class_form_status_msgs_ = {} #maps command_id's to status bar msgs
+    _form_exit_ = EXIT_ONDESTROY
+    _form_count_ = 0
+    _form_status_msgs_ = {} #maps command_id's to status bar msgs
 
     _form_menu_ = [(MF_POPUP, "&File",
                     [(MF_SEPARATOR,),
                      (MF_STRING, "&Exit", ID_EXIT)])]
 
-    _form_title_ = ""
-    
     def __init__(self, *args, **kwargs):
-        menu = kwargs.get('menu', None) or self.EvalMenu(None, self._form_menu_)
-        if menu: kwargs['menu'] = menu
-        kwargs['title'] = kwargs.get('title', '') or self._form_title_
-        Window.__init__(self, *args, **kwargs)
+        self.m_controls = Controls()
+        aMenu = kwargs.get('menu', None) or (self._form_menu_ and menu.EvalMenu(self._form_menu_))
+        if aMenu: kwargs['menu'] = aMenu
         #install accelerator support
         self.CreateAccels()
         GetMessageLoop().AddFilter(self.PreTranslateMessage)
-        Form._class_form_count_ += 1
-        self.m_controls = Controls()
-        
+        Form._form_count_ += 1
+        Window.__init__(self, *args, **kwargs)
 
     controls = property(lambda self: self.m_controls)
     
@@ -114,39 +117,20 @@ class Form(Window):
         #TODO weak ref on filter
         GetMessageLoop().RemoveFilter(self.PreTranslateMessage)
         #TODO dispose Accel Table weak refs?
+
+    _haccel_ = 0
         
     def CreateAccels(self):
-        """Create accelerator table from _class_accels_"""
-        if self._class_accels_ and not Form._haccel_:
-            accels = (ACCEL * len(self._class_accels_))()
-            for i in range(len(self._class_accels_)):
-                accels[i].fVirt = self._class_accels_[i][0]
-                accels[i].key   = self._class_accels_[i][1]
-                accels[i].cmd   = self._class_accels_[i][2]
-            Form._haccel_ = CreateAcceleratorTable(byref(accels), len(self._class_accels_))
+        """Create accelerator table from _form_accels_"""
+        if self._form_accels_ and not Form._haccel_:
+            accels = (ACCEL * len(self._form_accels_))()
+            for i in range(len(self._form_accels_)):
+                accels[i].fVirt = self._form_accels_[i][0]
+                accels[i].key   = self._form_accels_[i][1]
+                accels[i].cmd   = self._form_accels_[i][2]
+            Form._haccel_ = CreateAcceleratorTable(byref(accels), len(self._form_accels_))
 
 
-    def EvalMenu(self, parent, item):
-        #the menus and popupmenus created by this method are non managed (
-        #this is because the real handle will be owned by the form window
-        #and the menu's will be destroyed when the window itself is destroyed
-        if item is None:
-            return None
-        if parent is None:
-            menu = Menu(managed = False)
-            for subItem in item:
-                self.EvalMenu(menu, subItem)
-            return menu
-        elif item[0] == MF_POPUP:
-            popupMenu = PopupMenu(managed = False)
-            for subItem in item[2]:
-                self.EvalMenu(popupMenu, subItem)
-            parent.AppendMenu(MF_POPUP, popupMenu, item[1])
-        elif item[0] == MF_STRING:
-            parent.AppendMenu(MF_STRING, item[2], item[1])
-        elif item[0] == MF_SEPARATOR:
-            parent.AppendMenu(MF_SEPARATOR, 0, 0)
-            
     def PreTranslateMessage(self, msg):
         if Form._haccel_ and self.handle == GetForegroundWindow():
             return TranslateAccelerator(self.handle, Form._haccel_, byref(msg))
@@ -161,7 +145,7 @@ class Form(Window):
         if wFlags == 0xffff and event.lParam == 0:
             statusBar.Simple(0)
         else:
-            txt = self._class_form_status_msgs_.get(LOWORD(event.wParam), "")
+            txt = self._form_status_msgs_.get(LOWORD(event.wParam), "")
             statusBar.Simple(1)
             statusBar.SetText(txt)
 
@@ -176,15 +160,15 @@ class Form(Window):
         
     def OnInitMenuPopup(self, event):
         """querys cmd ui update map to see if menu items must be enabled/disabled"""
+        if HIWORD(event.lParam) == 1: return #it's the window menu
         cmdUiUpdateMap = self._msg_map_._msg_map_.get("CMD_UI_UPDATE_MAP", {})
-        menu = instanceFromHandle(event.wParam)
-        if not menu: return #not a wtl menu
+        hMenu = event.wParam
         minfo = MENUITEMINFO()
         minfo.cbSize = sizeof(MENUITEMINFO)
         minfo.fMask = MIIM_ID | MIIM_TYPE
-        for i in range(len(menu)):
+        for i in range(GetMenuItemCount(hMenu)):
             minfo.fMask = MIIM_ID | MIIM_TYPE
-            GetMenuItemInfo(menu.handle, i, 1, byref(minfo))
+            GetMenuItemInfo(hMenu, i, 1, byref(minfo))
             if minfo.fType == MFT_STRING:
                 handler = cmdUiUpdateMap.get(minfo.wID, None)
                 if handler:
@@ -195,7 +179,7 @@ class Form(Window):
                         minfo.fState = MFS_ENABLED
                     else:
                         minfo.fState = MFS_DISABLED
-                    SetMenuItemInfo(menu.handle, i, 1, byref(minfo))
+                    SetMenuItemInfo(hMenu, i, 1, byref(minfo))
 
     def DoLayout(self, cx, cy):
         """Lays out the form. A form consists of an optional toolbar, view and statusbar"""
@@ -235,31 +219,39 @@ class Form(Window):
         if coolBar: coolBar.Invalidate()
         
     def OnDestroy(self, event):
-        Form._class_form_count_ -= 1
-        if self._class_form_exit_ == EXIT_ONDESTROY:
-            PostQuitMessage(0)
-        elif self._class_form_exit_ == EXIT_ONLASTDESTROY and \
-             self._class_form_count_ == 0:
+        self.dispose()
+        Form._form_count_ -= 1
+        if self._form_exit_ == EXIT_ONDESTROY:
+            PostQuitMessage(0)            
+        elif self._form_exit_ == EXIT_ONLASTDESTROY and \
+             self._form_count_ == 0:
             PostQuitMessage(0)
 
     def OnSize(self, event):
         self.DoLayout(*event.size)
 
-    def OnExit(self, event):
+    def OnCreate(self, event):
+        pass
+        
+    def OnExitCmd(self, event):
         self.SendMessage(WM_CLOSE)
 
-    ##override and set event.handled = 1 to prevent
+    def OnCloseCmd(self, event):
+        self.SendMessage(WM_CLOSE)
+
+    ##override and set event.handled = True to prevent
     ##form from closing
     def OnClose(self, event):
-        self.dispose()
-        event.handled = 0
+        event.handled = False #event will buble and invoke window destroy eventually
     
-    _msg_map_ = MSG_MAP([MSG_HANDLER(WM_SIZE, OnSize),
-                         MSG_HANDLER(WM_DESTROY, OnDestroy),
+    _msg_map_ = MSG_MAP([MSG_HANDLER(WM_DESTROY, OnDestroy),
+                         MSG_HANDLER(WM_CREATE, OnCreate),
+                         MSG_HANDLER(WM_SIZE, OnSize),
                          MSG_HANDLER(WM_CLOSE, OnClose),
                          MSG_HANDLER(WM_MENUSELECT, OnMenuSelect),
                          MSG_HANDLER(WM_INITMENUPOPUP, OnInitMenuPopup),
-                         CMD_ID_HANDLER(ID_EXIT, OnExit),
+                         CMD_ID_HANDLER(ID_EXIT, OnExitCmd),
+                         CMD_ID_HANDLER(ID_CLOSE, OnCloseCmd),
                          NTF_HANDLER(comctl.RBN_HEIGHTCHANGE,
                                      lambda self, event: self.DoLayout(*self.clientRect.size)),
                          ])

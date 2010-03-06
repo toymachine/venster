@@ -42,22 +42,22 @@ class MyTrackBar(trackbar.TrackBar):
         print "onscroll!"
 
 class MyForm(form.Form):
-    _class_icon_ = Icon("COW.ICO")
-    _class_icon_sm_ = _class_icon_
-    _class_background_ = 0
-    _class_accels_ = [(FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW)]
-    _class_form_exit_ = form.EXIT_ONLASTDESTROY
-    _class_form_status_msgs_ = {form.ID_NEW: "Creates a new window."}
+    _window_icon_ = Icon("COW.ICO")
+    _window_icon_sm_ = _window_icon_
+    _window_background_ = 0
+    _window_title_ = "Supervaca al Rescate!"
+
+    _form_accels_ = [(FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW)]
+    _form_exit_ = form.EXIT_ONLASTDESTROY
+    _form_status_msgs_ = {form.ID_NEW: "Creates a new window."}
 
     _form_menu_ = None #suppress default menu
-    _form_title_ = "Supervaca al Rescate!"
     
     def __init__(self):
-        self.enableLayout = 0 #supress layout due to rebar notfications during construction
         self.CreateMenu()
-        
         form.Form.__init__(self)      
 
+    def OnCreate(self, event):
         coolBar = coolbar.CoolBar(parent = self)
 
         commandBar = coolbar.CommandBar(parent = coolBar)
@@ -65,7 +65,7 @@ class MyForm(form.Form):
         
         addressBar = comctl.ComboBox(parent = coolBar)
 
-        buttons = comctl.ToolBar(parent = coolBar)
+        buttons = coolbar.ToolBar(parent = coolBar)
         buttons.SetImageList(iml)
         buttons.SetButtonSize(32, 32)
 
@@ -111,8 +111,6 @@ class MyForm(form.Form):
         self.controls.Add(form.CTRL_VIEW, aList)
         self.controls.Add(form.CTRL_COOLBAR, coolBar)
         self.controls.Add(form.CTRL_STATUSBAR, comctl.StatusBar(parent = self))
-
-        self.enableLayout = 1
         
     def CreateMenu(self):
         self.menu = Menu()
@@ -141,12 +139,10 @@ class MyForm(form.Form):
         self.menu.AppendMenu(MF_POPUP, self.menuEdit, "&Edit")
 
     def OnNew(self, event):
-        form = Form()
+        form = MyForm()
         form.ShowWindow()
 
-    _msg_map_ = MSG_MAP([CMD_ID_HANDLER(form.ID_NEW, OnNew),
-                         CHAIN_MSG_MAP(form.Form._msg_map_)])
-
+    cmd_handler(form.ID_NEW)(OnNew)
 
 if __name__ == '__main__':
     mainForm = MyForm()        

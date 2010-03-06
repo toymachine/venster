@@ -1,0 +1,11 @@
+1) When I run a venster script under Windows XP, icons have a black background and some 
+	common controls look really ugly, how come?
+
+	- Programs running on XP need a 'manifest' file to tell windows to load
+	  the correct version of the common controls DLL. Copy the 2 manifest files
+	  from the venster folder to the folder where the python interpreter is located (python.exe and pythonw.exe)
+	  (usually somewhere like c:\python23).
+	- If you create an executable using something like py2exe, make sure that you also deliver a manifest file
+	  with your distribution (rename the manifest file after your .exe, e.g. myapp.exe <-> myapp.exe.manifest)
+
+	

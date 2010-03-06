@@ -22,8 +22,9 @@
 from venster.windows import *
 from venster.wtl import *
 from venster.debug import *
+from venster.gdi import *
+
 from venster import comctl
-from venster import gdi
 from venster.lib import form
 
 
@@ -31,7 +32,8 @@ comctl.InitCommonControls(comctl.ICC_LISTVIEW_CLASSES | comctl.ICC_COOL_CLASSES 
                           comctl.ICC_USEREX_CLASSES)
 
 class Canvas(Window):
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE
+    _window_style_ = WS_CHILD | WS_VISIBLE
+    _window_background_ = GetStockObject(WHITE_BRUSH)
     
     def __init__(self, *args, **kwargs):
         Window.__init__(self, *args, **kwargs)
@@ -57,6 +59,8 @@ class Canvas(Window):
         self.dragging = True
         self.SetCapture()
 
+    msg_handler(WM_LBUTTONDOWN)(OnLeftButtonDown)
+    
     def DragEnd(self):
         if self.lastDragEnd:
             hdc = self.GetDCEx(NULL, DCX_PARENTCLIP)
@@ -74,10 +78,12 @@ class Canvas(Window):
         endX = max(self.dragStart.x, self.lastDragEnd.x)
         endY = max(self.dragStart.y, self.lastDragEnd.y)
         #draw the rubberband
-        gdi.DrawFocusRect(hdc, byref(RECT(startX, startY, endX, endY)))
+        DrawFocusRect(hdc, byref(RECT(startX, startY, endX, endY)))
         
     def OnLeftButtonUp(self, event):
         self.DragEnd()
+
+    msg_handler(WM_LBUTTONUP)(OnLeftButtonUp)
 
     def OnMouseMove(self, event):
         if not self.dragging: return
@@ -94,9 +100,13 @@ class Canvas(Window):
         self.lastDragEnd = cpos
         self.DrawRect(hdc)
         self.ReleaseDC(hdc)
-            
+
+    msg_handler(WM_MOUSEMOVE)(OnMouseMove)
+    
     def OnCancelMode(self, event):
         self.DragEnd()
+
+    msg_handler(WM_CANCELMODE)(OnCancelMode)
 
     hatchPen = Pen.CreateEx(dwPenStyle = PS_GEOMETRIC | PS_SOLID, dwWidth = 5,
                             lbStyle = BS_HATCHED, lbColor = 0x00000000,
@@ -115,11 +125,11 @@ class Canvas(Window):
     def DrawSelectRect(self, hdc, rc):
         """draws a marker around a selected item"""
         oldPen = SelectObject(hdc, self.hatchPen.handle)
-        gdi.MoveToEx(hdc, rc.left, rc.top, 0)
-        gdi.LineTo(hdc, rc.right, rc.top)
-        gdi.LineTo(hdc, rc.right, rc.bottom)
-        gdi.LineTo(hdc, rc.left, rc.bottom)
-        gdi.LineTo(hdc, rc.left, rc.top)
+        MoveToEx(hdc, rc.left, rc.top, 0)
+        LineTo(hdc, rc.right, rc.top)
+        LineTo(hdc, rc.right, rc.bottom)
+        LineTo(hdc, rc.left, rc.bottom)
+        LineTo(hdc, rc.left, rc.top)
         SelectObject(hdc, oldPen)
         for dragRc in self.GetDragRects(rc):
             FillRect(hdc, byref(dragRc), self.rectBrush.handle)
@@ -136,6 +146,8 @@ class Canvas(Window):
                            ctrlWr.bottom - selfWr.top + 2)            
             self.DrawSelectRect(hdc, selRect)
         self.EndPaint(ps)
+
+    msg_handler(WM_PAINT)(OnPaint)
 
     defaultCursor = LoadCursor(NULL, IDC_ARROW)
     
@@ -157,19 +169,13 @@ class Canvas(Window):
         else:
             SetCursor(self.defaultCursor)
 
-    _msg_map_ = MSG_MAP([MSG_HANDLER(WM_LBUTTONDOWN, OnLeftButtonDown),
-                         MSG_HANDLER(WM_LBUTTONUP, OnLeftButtonUp),
-                         MSG_HANDLER(WM_MOUSEMOVE, OnMouseMove),
-                         MSG_HANDLER(WM_CANCELMODE, OnCancelMode),
-                         MSG_HANDLER(WM_PAINT, OnPaint),
-                         MSG_HANDLER(WM_SETCURSOR, OnSetCursor),
-                         ])
+    msg_handler(WM_SETCURSOR)(OnSetCursor)
 
 msgFormatter = MsgFormatter()
 
 class intercept(object):
     def __init__(self, target, source):
-        self.newProc = WndProc(self.WndProc)
+        self.newProc = WNDPROC(self.WndProc)
         self.oldProc = source.SubClass(self.newProc)
         self.target = target
         self.source = source
@@ -198,7 +204,7 @@ class intercept(object):
             return CallWindowProc(self.oldProc, hWnd, nMsg, wParam, lParam)
         
 class Form(form.Form):
-    _class_accels_ = [(FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW),
+    _form_accels_ = [(FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW),
                       (FCONTROL|FVIRTKEY, ord("O"), form.ID_OPEN),]
     
     _form_menu_ = [(MF_POPUP, "&File", 
@@ -208,11 +214,12 @@ class Form(form.Form):
                      ]),
                    ]
 
-    _form_title_ = "Venster Resource Editor"
+    _window_title_ = "Venster Resource Editor"
     
     def __init__(self):
         form.Form.__init__(self)      
 
+    def OnCreate(self, event):
         canvas = Canvas(parent = self)
         self.controls.Add(form.CTRL_VIEW, canvas)
         self.controls.Add(form.CTRL_STATUSBAR, comctl.StatusBar(parent = self))
@@ -230,8 +237,7 @@ class Form(form.Form):
 
         intercept(self.canvas, self.combo)
         
-    _msg_map_ = MSG_MAP([CMD_ID_HANDLER(form.ID_NEW, OnNew),
-                         CHAIN_MSG_MAP(form.Form._msg_map_)])
+    cmd_handler(form.ID_NEW)(OnNew)
    
 if __name__ == '__main__':
     mainForm = Form()

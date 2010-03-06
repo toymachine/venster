@@ -28,29 +28,28 @@ class MyForm(form.Form):
     """sample showing how a form can be prevented from closing by
     overriding the OnClose method of Form"""
     
-    _class_icon_ = _class_icon_sm_ = Icon("blinky.ico")
-    _class_form_exit_ = form.EXIT_ONLASTDESTROY
-    _class_accels_ = [(FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW)]
-    _class_background_ = Window._class_background_ #default white background
+    _window_icon_ = _window_icon_sm_ = Icon("blinky.ico")
+    _window_title_ = "Test close" 
 
     _form_menu_ = [(MF_POPUP, "&File",
                     [(MF_STRING, "&New\bCtrl+N", form.ID_NEW),
                      (MF_SEPARATOR,),
                      (MF_STRING, "&Exit", form.ID_EXIT)])]
 
-    _form_title_ = "Test close" 
-    
+    _form_accels_ = [(FCONTROL|FVIRTKEY, ord("N"), form.ID_NEW)]
+
+    _form_exit_ = form.EXIT_ONLASTDESTROY
+
     def OnNew(self, event):
         newForm = MyForm()
         newForm.ShowWindow()
 
+    cmd_handler(form.ID_NEW)(OnNew)
+
     def OnClose(self, event):
         res = MessageBox(self.handle, "Really close?", "Test Close", MB_YESNO | MB_ICONQUESTION)
+        if res == IDYES: event.handled = False #mark as unhandled, default handler will close window
 
-        if res == IDYES: event.handled = 0 #mark as unhandled, default handler will close window
-
-    _msg_map_ = MSG_MAP([CMD_ID_HANDLER(form.ID_NEW, OnNew),
-                         CHAIN_MSG_MAP(form.Form._msg_map_)])    
 
 if __name__ == '__main__':
     mainForm = MyForm()        

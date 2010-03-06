@@ -96,7 +96,7 @@ class MyBrowser(browser.Browser):
     def TitleChange(self, this, txt):
         form = self.parent
         try:
-            form.SetText("%s - %s" % (form._form_title_, str(txt)))
+            form.SetText("%s - %s" % (form._window_title_, str(txt)))
         except:
             pass
 
@@ -117,11 +117,12 @@ class MyBrowser(browser.Browser):
         
         
 class MyForm(form.Form):
-    _form_title_ = "Venster Explorer"
+    _window_title_ = "Venster Explorer"
     
     def __init__(self):
         form.Form.__init__(self)      
-        
+
+    def OnCreate(self, event):
         aBrowser = MyBrowser(parent = self)
         self.controls.Add(form.CTRL_VIEW, aBrowser)
         self.controls.Add(form.CTRL_STATUSBAR, comctl.StatusBar(parent = self))

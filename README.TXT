@@ -25,15 +25,24 @@ The goals of this work are:
   (just use .NET then, and distribute the 20mb runtime with it (or Java with its 10mb runtime))
   So small is really the key here
 
- 
-Try any of the 
+
+read INSTALL.TXT for installation instructions,
+then go to the test folder and
+ try any of the 
 
 test_*.py files to see the results sofar.
 
-
 Grtz,
 
-Henk Punt
+Henk Punt (henk@entree.nl)
 
-henk@entree.nl
+
+Venster is also made possible by the contributions and suggestions from:
+
+Thomas Heller (theller@python.net)
+Wim Vree (wim@vree.be)
+Andrew MacIntyre (andrew.macintyre@aba.gov.au)
+Brad Clements (bkc@murkworks.com)
+Dave Brueck (dave@solussoftware.com)
+
 

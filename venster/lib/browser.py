@@ -52,7 +52,7 @@ from ie6_gen import DWebBrowserEvents2, IWebBrowser2
 
 class Browser(AxWindow, dispinterface_EventReceiver):
     """Internet Explorer as ActiveX Control"""    
-    _class_ws_style_ = AxWindow._class_ws_style_ | WS_HSCROLL | WS_VSCROLL
+    _window_style_ = AxWindow._window_style_ | WS_HSCROLL | WS_VSCROLL
 
     _com_interfaces_ = [DWebBrowserEvents2]
 

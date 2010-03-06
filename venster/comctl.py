@@ -84,7 +84,7 @@ class NMCBEENDEDIT(Structure):
 class LVCOLUMN(MaskedStructure):
     _mask_ = 'mask'
     _fields_ = [("mask", UINT),
-                ("fmt", INT),
+                ("fmt", INT, LVCF_FMT, "format"),
                 ("cx", INT, LVCF_WIDTH, 'width'),
                 ("pszText", LPTSTR, LVCF_TEXT, 'text'),
                 ("cchTextMax", INT),
@@ -92,14 +92,13 @@ class LVCOLUMN(MaskedStructure):
                 ("iImage", INT),
                 ("iOrder", INT)]
 
-class LVITEM(MaskedStructure):
-    _mask_ = 'mask'
+class LVITEM(Structure):
     _fields_ = [("mask", UINT),
                 ("iItem", INT),
                 ("iSubItem", INT),
                 ("state", UINT),
                 ("stateMask", UINT),
-                ("pszText", LPTSTR, LVIF_TEXT, 'text'),
+                ("pszText", LPTSTR),
                 ("cchTextMax", INT),
                 ("iImage", INT),
                 ("lParam", LPARAM),
@@ -233,6 +232,17 @@ class PBRANGE(Structure):
     _fields_ = [("iLow", INT),
                 ("iHigh", INT)]
     
+class NMITEMACTIVATE(Structure):
+    _fields_ = [("hdr", NMHDR),
+                ("iItem", c_int),
+                ("iSubItem", c_int),
+                ("uNewState", UINT),
+                ("uOldState", UINT),
+                ("uChanged", UINT),
+                ("ptAction", POINT),
+                ("lParam", LPARAM),
+                ("uKeyFlags", UINT)]
+
 NM_FIRST    =   UINT_MAX
 
 SBS_BOTTOMALIGN = 4
@@ -302,6 +312,7 @@ TB_SETHOTITEM   =        (WM_USER + 72)
 TB_HITTEST     =         (WM_USER + 69)
 TB_GETHOTITEM  =         (WM_USER + 7)
 TB_SETBUTTONSIZE     =  (WM_USER + 31)
+TB_AUTOSIZE          =  (WM_USER + 33)
 
 TVIF_TEXT    = 1
 TVIF_IMAGE   =2
@@ -551,6 +562,10 @@ LVM_SETCOLUMNA  =        (LVM_FIRST + 26)
 LVM_SETCOLUMNW  =        (LVM_FIRST + 96)
 LVM_SETCOLUMN = LVM_SETCOLUMNA
 LVM_SETCOLUMNWIDTH =  (LVM_FIRST + 30)
+LVM_GETITEMA   =         (LVM_FIRST + 5)
+LVM_GETITEMW   =         (LVM_FIRST + 75)
+LVM_GETITEM = LVM_GETITEMA
+LVM_SETEXTENDEDLISTVIEWSTYLE = (LVM_FIRST + 54)
 
 LVN_FIRST = (UINT_MAX) - 100
 LVN_ITEMCHANGING    =    (LVN_FIRST-0)
@@ -682,6 +697,13 @@ PBM_GETPOS      = (WM_USER+8)
 PBM_SETBARCOLOR = (WM_USER+9)
 PBM_SETBKCOLOR  = CCM_SETBKCOLOR
 
+LB_ADDSTRING = 384
+LB_INSERTSTRING = 385
+LB_DELETESTRING = 386
+LB_RESETCONTENT = 388
+LB_GETCOUNT = 395
+LB_SETTOPINDEX = 407
+
 ImageList_Create = windll.comctl32.ImageList_Create
 ImageList_Destroy = windll.comctl32.ImageList_Destroy
 ImageList_AddMasked = windll.comctl32.ImageList_AddMasked
@@ -692,13 +714,13 @@ ImageList_SetBkColor = windll.comctl32.ImageList_SetBkColor
 InitCommonControlsEx = windll.comctl32.InitCommonControlsEx
 
 class Button(Window):
-    _class_ = BUTTON
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON
+    _window_class_ = BUTTON
+    _window_style_ = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON
     
         
 class StatusBar(Window):
-    _class_ = STATUSCLASSNAME
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE | SBS_SIZEGRIP
+    _window_class_ = STATUSCLASSNAME
+    _window_style_ = WS_CHILD | WS_VISIBLE | SBS_SIZEGRIP
 
     def Simple(self, fSimple):
         self.SendMessage(SB_SIMPLE, fSimple, 0)
@@ -707,16 +729,38 @@ class StatusBar(Window):
         self.SendMessage(SB_SETTEXT, (255 | SBT_NOBORDERS), txt)
 
 class ComboBox(Window):
-    _class_ = WC_COMBOBOXEX
-    _class_ws_style_ = WS_VISIBLE | WS_CHILD | CBS_DROPDOWN
+    _window_class_ = WC_COMBOBOXEX
+    _window_style_ = WS_VISIBLE | WS_CHILD | CBS_DROPDOWN
 
 class Edit(Window):
-    _class_ = EDIT
-    _class_ws_style_ = WS_VISIBLE | WS_CHILD
+    _window_class__ = EDIT
+    _window_style_ = WS_VISIBLE | WS_CHILD
+
+class ListBox(Window):
+    _window_class_ = 'ListBox'
+    _window_style_ = WS_VISIBLE | WS_CHILD
+
+    def AddString (self, txt):
+        self.SendMessage(LB_ADDSTRING, 0, txt)
+
+    def InsertString (self, idx, txt):
+        self.SendMessage(LB_INSERTSTRING, idx, txt)
+
+    def DeleteString (self, idx):
+        self.SendMessage(LB_DELETESTRING, idx)
+
+    def ResetContent (self):
+        self.SendMessage(LB_RESETCONTENT)
+
+    def GetCount (self):
+        return self.SendMessage(LB_GETCOUNT)
+
+    def SetTopIndex (self, idx):
+        self.SendMessage (LB_SETTOPINDEX, idx)
 
 class ProgressBar(Window):
-    _class_ = PROGRESS_CLASS
-    _class_ws_style_ = WS_VISIBLE | WS_CHILD
+    _window_class_ = PROGRESS_CLASS
+    _window_style_ = WS_VISIBLE | WS_CHILD
 
     def SetRange(self, nMinRange, nMaxRange):
         if nMinRange > 65535 or nMaxRange > 65535:
@@ -749,9 +793,9 @@ class ProgressBar(Window):
         return self.SendMessage(PBM_DELTAPOS, nIncrement, 0)
 
 class TrackBar(Window):
-    _class_ = TRACKBAR_CLASS
-    _class_ws_style_ = WS_VISIBLE | WS_CHILD | TBS_AUTOTICKS | TBS_TOOLTIPS
-    _class_ws_ex_style_ = 0
+    _window_class_ = TRACKBAR_CLASS
+    _window_style_ = WS_VISIBLE | WS_CHILD | TBS_AUTOTICKS | TBS_TOOLTIPS
+    _window_style_ex_ = 0
 
     def __init__(self, *args, **kwargs):
         Window.__init__(self, *args, **kwargs)
@@ -793,8 +837,8 @@ class TrackBar(Window):
         return self.SendMessage(TBM_SETBUDDY, fLocation, hwndBuddy)
     
 class TabControl(Window):
-    _class_ = WC_TABCONTROL
-    _class_ws_style_ = WS_VISIBLE | WS_CHILD | TCS_MULTILINE
+    _window_class_ = WC_TABCONTROL
+    _window_style_ = WS_VISIBLE | WS_CHILD | TCS_MULTILINE
 
     def InsertItem(self, iItem, item):        
         return self.SendMessage(TCM_INSERTITEM, iItem, byref(item))
@@ -819,10 +863,10 @@ class TabControl(Window):
         
     
 class TreeView(Window):
-    _class_ = WC_TREEVIEW
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE | WS_TABSTOP |\
+    _window_class_ = WC_TREEVIEW
+    _window_style_ = WS_CHILD | WS_VISIBLE | WS_TABSTOP |\
                        TVS_HASBUTTONS|TVS_LINESATROOT|TVS_HASLINES
-    _class_ws_ex_style_ = 0
+    _window_style_ex_ = 0
 
     def InsertItem(self, hParent, hInsertAfter, itemEx):
         insertStruct = TVINSERTSTRUCT()
@@ -872,10 +916,15 @@ class TreeView(Window):
         return self.SendMessage(TVM_GETNEXTITEM, TVGN_CARET)
     
 class ListView(Window):
-    _class_ = WC_LISTVIEW
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE | LVS_REPORT 
-    _class_ws_ex_style_ = 0
+    _window_class_ = WC_LISTVIEW
+    _window_style_ = WS_CHILD | WS_VISIBLE | LVS_REPORT 
+    _window_style_ex_ = 0
+    _listview_style_ex_ = 0
 
+    def __init__(self, *args, **kwargs):
+        Window.__init__(self, *args, **kwargs)
+        self.SetExtendedListViewStyle(self._listview_style_ex_, self._listview_style_ex_)
+        
     def InsertColumn(self, iCol, lvcolumn):
         return self.SendMessage(LVM_INSERTCOLUMN, iCol, byref(lvcolumn))
 
@@ -886,6 +935,7 @@ class ListView(Window):
         return self.SendMessage(LVM_SETCOLUMNWIDTH, iCol, width)
     
     def InsertItem(self, item):
+        if item.iItem == -1: item.iItem = self.GetItemCount()
         return self.SendMessage(LVM_INSERTITEM, 0, byref(item))
 
     def SetItem(self, item):
@@ -908,13 +958,25 @@ class ListView(Window):
     def GetItemCount(self):
         return self.SendMessage(LVM_GETITEMCOUNT)
 
+    def GetItemParam(self, i):
+        item = LVITEM()
+        item.iItem = i
+        item.mask = LVIF_PARAM
+        self.SendMessage(LVM_GETITEM, 0, byref(item))
+        return item.lParam
+    
+    def SetItemCount(self, cItems, dwFlags = 0):
+        self.SendMessage(LVM_SETITEMCOUNT, cItems, dwFlags)
+        
     def GetSelectedCount(self):
         return self.SendMessage(LVM_GETSELECTEDCOUNT)
+
+    def SetExtendedListViewStyle(self, dwExMask, dwExStyle):
+        return self.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, dwExMask, dwExStyle)
     
 class ToolBar(Window):
-    _class_ = TOOLBARCLASSNAME
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CCS_NODIVIDER |\
-                       CCS_NORESIZE | CCS_NOPARENTALIGN | TBSTYLE_FLAT | TBSTYLE_LIST
+    _window_class_ = TOOLBARCLASSNAME
+    _window_style_ = WS_CHILD | WS_VISIBLE
 
     def __init__(self, *args, **kwargs):
         Window.__init__(self, *args, **kwargs)
@@ -947,11 +1009,11 @@ class ToolBar(Window):
         return self.SendMessage(TB_SETBUTTONSIZE, 0, MAKELONG(dxButton, dyButton))
             
 class Rebar(Window):
-    _class_ = REBARCLASSNAME
-    _class_ws_style_ = WS_CHILDWINDOW|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|WS_BORDER|\
+    _window_class_ = REBARCLASSNAME
+    _window_style_ = WS_CHILDWINDOW|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|WS_BORDER|\
                        RBS_VARHEIGHT|RBS_BANDBORDERS|RBS_AUTOSIZE|RBS_DBLCLKTOGGLE|\
                        RBS_REGISTERDROP|CCS_NODIVIDER|CCS_TOP|CCS_NOPARENTALIGN
-    _class_ws_ex_style_ = WS_EX_LEFT|WS_EX_LTRREADING|WS_EX_RIGHTSCROLLBAR|WS_EX_TOOLWINDOW
+    _window_style_ex_ = WS_EX_LEFT|WS_EX_LTRREADING|WS_EX_RIGHTSCROLLBAR|WS_EX_TOOLWINDOW
 
     def __init__(self, *args, **kwargs):
         Window.__init__(self, *args, **kwargs)

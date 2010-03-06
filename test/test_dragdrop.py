@@ -139,8 +139,9 @@ class List(list.List, COMObject):
 
         print dataObject._refcnt
         print dropSource._refcnt
-        
-    _msg_map_ = MSG_MAP([NTF_HANDLER(comctl.LVN_BEGINDRAG, OnBeginDrag)])
+
+    
+    ntf_handler(comctl.LVN_BEGINDRAG)(OnBeginDrag)
 
     ###############
     ## IDropTarget:
@@ -173,18 +174,16 @@ class List(list.List, COMObject):
         return S_OK
 
 class Form(form.Form):
-    _class_icon_sm_ = _class_icon_ = Icon("COW.ICO")
+    _window_icon_sm_ = _window_icon_ = Icon("COW.ICO")
 
-    _form_title_ = "Drag and Drop Sample"
+    _window_title_ = "Drag and Drop Sample"
 
     _form_menu_ = [(MF_POPUP, "&File",
                     [(MF_STRING, "&New\bCtrl+N", form.ID_NEW),
                      (MF_SEPARATOR,),
                      (MF_STRING, "&Exit", form.ID_EXIT)])]
     
-    def __init__(self):
-        form.Form.__init__(self)      
-
+    def OnCreate(self, event):
         aList = List(parent = self, orExStyle = WS_EX_CLIENTEDGE)
         aTree = Tree(parent = self, orExStyle = WS_EX_CLIENTEDGE)
         
@@ -200,8 +199,7 @@ class Form(form.Form):
         newForm = Form()
         newForm.ShowWindow()
 
-    _msg_map_ = MSG_MAP([CMD_ID_HANDLER(form.ID_NEW, OnNew),
-                         CHAIN_MSG_MAP(form.Form._msg_map_)])    
+    cmd_handler(form.ID_NEW)(OnNew)
 
 
 mainForm = Form()

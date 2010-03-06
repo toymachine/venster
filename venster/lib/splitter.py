@@ -27,9 +27,9 @@ HORIZONTAL = 1
 VERTICAL = 2
     
 class Splitter(Window):
-    _class_ws_style_ = WS_CHILD | WS_VISIBLE
-    _class_ws_ex_style_ = 0
-    _class_background_ = gdi.GetSysColorBrush(COLOR_BTNFACE)
+    _window_style_ = WS_CHILD | WS_VISIBLE
+    _window_style_ex_ = 0
+    _window_background_ = gdi.GetSysColorBrush(COLOR_BTNFACE)
 
     def __init__(self, *args, **kwargs):
         self.splitWidth = kwargs.get('splitWidth', 4)
@@ -38,7 +38,6 @@ class Splitter(Window):
         if kwargs.has_key('splitPos'): del kwargs['splitPos']
         if kwargs.has_key('splitWidth'): del kwargs['splitWidth']
         if kwargs.has_key('orientation'): del kwargs['orientation']
-        Window.__init__(self, *args, **kwargs)
 
         #TODO wrap cursor type: (and then dispose)
         if self.orientation == VERTICAL:
@@ -53,11 +52,14 @@ class Splitter(Window):
         hbitmap = gdi.CreateBitmap(8, 8, 1, 1, byref(brushPat))
         if hbitmap:
             self.brush = gdi.CreatePatternBrush(hbitmap)
-            DeleteObject(hbitmap)
+            gdi.DeleteObject(hbitmap)
         else:
             self.brush = gdi.CreateHatchBrush(gdi.HS_DIAGCROSS, 0)
 
         self.m_views = {}
+
+        Window.__init__(self, *args, **kwargs)
+
 
     def dispose(self):
         del self.m_views
@@ -72,6 +74,8 @@ class Splitter(Window):
         self.Layout(*event.size)
         
     def Layout(self, cx, cy):
+        if len(self.m_views) < 2: return
+        
         wr = self.windowRect
         pt = POINT()        
         pt.x = wr.left
