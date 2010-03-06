@@ -26,7 +26,7 @@ from venster.lib import form
 
 
 from ctypes import *
-from comtypes.client import GetEvents, ShowEvents, wrap
+from comtypes.client import GetEvents, wrap
 
 import flash
 

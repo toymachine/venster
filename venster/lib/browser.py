@@ -7,9 +7,8 @@ from venster.lib import dispatch
 from ctypes import *
 
 from comtypes import IUnknown, STDMETHOD, GUID, COMObject
-from comtypes.ole import IOleInPlaceActiveObject, IOleInPlaceUIWindow
 from comtypes.automation import IDispatch, VARIANT
-from comtypes.connectionpoints import dispinterface_EventReceiver
+#from comtypes.connectionpoints import dispinterface_EventReceiver
 
 class IDocHostUIHandler(IUnknown):
     _iid_ = GUID("{BD3F23C0-D43E-11CF-893B-00AA00BDCE1A}")
@@ -48,44 +47,46 @@ ICustomDoc._methods_ = IUnknown._methods_ + [
     STDMETHOD(HRESULT, "SetUIHandler", [POINTER(IDocHostUIHandler)])
     ]
     
-from ie6_gen import DWebBrowserEvents2, IWebBrowser2
+#from ie6_gen import DWebBrowserEvents2, IWebBrowser2
 
-class Browser(AxWindow, dispinterface_EventReceiver):
+class Browser(AxWindow):
     """Internet Explorer as ActiveX Control"""    
     _window_style_ = AxWindow._window_style_ | WS_HSCROLL | WS_VSCROLL
 
-    _com_interfaces_ = [DWebBrowserEvents2]
+    #_com_interfaces_ = [DWebBrowserEvents2]
 
     def __init__(self, url = "about:blank", *args, **kwargs):
         kwargs['ctrlId'] = url #if url is passed to axwindow, IE control is launched
         AxWindow.__init__(self, *args, **kwargs)
-        dispinterface_EventReceiver.__init__(self)
+        #dispinterface_EventReceiver.__init__(self)
 
-        pUnk = self.GetControl() #IUnknown of IE
-        pOle = POINTER(IOleInPlaceActiveObject)() #automation object
-        pUnk.QueryInterface(byref(IOleInPlaceActiveObject._iid_), byref(pOle))        
-        self.pOle = pOle
+        #pUnk = self.GetControl() #IUnknown of IE
+        
+        #pOle = POINTER(IOleInPlaceActiveObject)() #automation object
+        #pUnk.QueryInterface(byref(IOleInPlaceActiveObject._iid_), byref(pOle))        
+        #self.pOle = pOle
 
-        self.pBrowser = POINTER(IWebBrowser2)() #the interface to IE
-        pUnk.QueryInterface(byref(IWebBrowser2._iid_), byref(self.pBrowser))
+        #self.pBrowser = POINTER(IWebBrowser2)() #the interface to IE
+        #pUnk.QueryInterface(byref(IWebBrowser2._iid_), byref(self.pBrowser))
 
-        self.connectInfo = self.connect(pUnk) #receive callbacks from IE
+        #self.connectInfo = self.connect(pUnk) #receive callbacks from IE
             
         #makes accelerator keys work in IE:
-        wtl.GetMessageLoop().AddFilter(self.PreTranslateMessage)
+        #wtl.GetMessageLoop().AddFilter(self.PreTranslateMessage)
 
         
     
     def dispose(self):
-        self.disconnect(self.connectInfo)
-        wtl.GetMessageLoop().RemoveFilter(self.PreTranslateMessage)
-        del self.pOle
-        del self.pBrowser
-        del self.connectInfo
+        #self.disconnect(self.connectInfo)
+        #wtl.GetMessageLoop().RemoveFilter(self.PreTranslateMessage)
+        #del self.pOle
+        #del self.pBrowser
+        #del self.connectInfo
+        pass
         
     def Navigate(self, url):
-         v = VARIANT()
-         self.pBrowser.Navigate(url, byref(v), byref(v), byref(v), byref(v))
+        v = VARIANT()
+        #self.pBrowser.Navigate(url, byref(v), byref(v), byref(v), byref(v))
 
     #filter needed to make 'del' and other accel keys work
     #within IE control. @see http://www.microsoft.com/mind/0499/faq/faq0499.asp

@@ -27,8 +27,8 @@ from venster.lib import dispatch
 from venster.lib import browser
 from venster.lib.browser import IDocHostUIHandler, ICustomDoc
 
-from ctypes.com.automation import IDispatch, VARIANT
-from ctypes.com import IUnknown, STDMETHOD, HRESULT, GUID, COMObject, E_NOTIMPL, S_OK
+from comtypes.automation import IDispatch, VARIANT
+from comtypes import IUnknown, STDMETHOD, HRESULT, GUID, COMObject
 
 ##CTYPES, yes a default factory would be very nice:
 class Factory:
@@ -123,7 +123,7 @@ class MyForm(form.Form):
         form.Form.__init__(self)      
 
     def OnCreate(self, event):
-        aBrowser = MyBrowser(parent = self)
+        aBrowser = MyBrowser(url = "http://www.microsoft.com", parent = self)
         self.controls.Add(form.CTRL_VIEW, aBrowser)
         self.controls.Add(form.CTRL_STATUSBAR, comctl.StatusBar(parent = self))
 
