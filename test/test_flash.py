@@ -28,11 +28,9 @@ from venster.lib import form
 from ctypes import *
 from comtypes.client import GetEvents, wrap
 
-import flash
-
 class FlashWindow(atl.AxWindow):
     def __init__(self, *args, **kwargs):
-        atl.AxWindow.__init__(self, flash.ShockwaveFlash._reg_clsid_, *args, **kwargs)
+        atl.AxWindow.__init__(self, "ShockwaveFlash.ShockwaveFlash", *args, **kwargs)
 
         pUnk = self.GetControl()
         #get the Flash interface of the control

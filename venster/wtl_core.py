@@ -266,7 +266,8 @@ class Window(WindowsObject):
                  nandExStyle = None,
                  width = CW_USEDEFAULT,
                  height = CW_USEDEFAULT,
-                 hWnd = None):
+                 hWnd = None,
+                 visible = True):
 
         if hWnd: #wrapping instead of creating
             self.m_handle = hWnd #note client is responsible for deleting
@@ -323,6 +324,11 @@ class Window(WindowsObject):
         if nandStyle:
             style &= ~nandStyle
 
+        if visible:
+            style |= WS_VISIBLE
+        else:
+            style &= ~WS_VISIBLE
+            
         left, right = rcPos.left, rcPos.right
         top, bottom = rcPos.top, rcPos.bottom
 
