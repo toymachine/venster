@@ -205,7 +205,7 @@ SIZEL = SIZE
 ##        return "MSG {%d %d %d %d %d %s}" % (self.hWnd, self.message, self.wParam, self.lParam,
 ##                                            self.time, str(self.pt))
 
-#Hack: we need to use the same MSG type as ctypes.com.ole uses!
+#Hack: we need to use the same MSG type as ctypes uses!
 from ctypes.wintypes import MSG
         
 class ACCEL(Structure):

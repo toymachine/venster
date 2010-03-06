@@ -23,6 +23,7 @@ from ctypes import *
 
 import sys
 import weakref
+import logging
 
 quit = False
 
@@ -78,33 +79,24 @@ def globalWndProc(hWnd, nMsg, wParam, lParam):
             if window:
                 #it is a venster window being created, establish the mapping:
                 WindowsObject.__init__(window, hWnd)
-
-        handled = False
-        result = None
-        
+    
         window = hndlMap.get(hWnd, None)
         if window:
             #this is a known venster window, let the window process its own msgs
             handled, result = window.WndProc(hWnd, nMsg, wParam, lParam)
-            if not handled and window._issubclassed_:
+            if handled:
+                return result
+    
+            if window._issubclassed_:
                 #its a subclassed window, try old window proc
-                result = CallWindowProc(window._old_wnd_proc_, hWnd, nMsg, wParam, lParam)
-                handled = True #always handled, either by old window proc, or old window proc called default handling
-
-        if not handled:
-            #still not handled, perform default processing
-            return DefWindowProc(hWnd, nMsg, wParam, lParam) #windows default processing
-        else:
-            return result
+                return CallWindowProc(window._old_wnd_proc_, hWnd, nMsg, wParam, lParam)
+    
+        #still not handled, perform default processing
+        return DefWindowProc(hWnd, nMsg, wParam, lParam) #windows default processing        
     except:
-        try:
-            import traceback
-            traceback.print_exc()
-        except:
-            pass #this happens when the python runtime is already exitting, but we are still registered
-            #as a window proc and windows keeps calling the callback
+        logging.exception("in global wndproc")
+        sys.exit(1)
         
-
 cGlobalWndProc = WNDPROC(globalWndProc)
 
 def handle(obj):
@@ -138,7 +130,8 @@ class WindowsObject(object):
         appropriate destructor function (__dispose__) whenever the object
         becomes garbage"""
         self.m_handle = handle
-        if managed: hndlMap[handle] = self
+        if managed: 
+            hndlMap[handle] = self
         
     handle = property(lambda self: self.m_handle)
 
@@ -345,7 +338,9 @@ class Window(WindowsObject):
         #for normal windows created trough venster, the mapping between window handle
         #and window instance will be established by processing the WM_NCCREATE msg
         #and looking up the instance in the createhndlMap
-        createHndlMap[id(self)] = self
+        #tmpId = len(createHndlMap) + 1
+        tmpId = id(self)
+        createHndlMap[tmpId] = self
         hWnd = CreateWindowEx(exStyle,
                               className,
                               title,
@@ -357,9 +352,8 @@ class Window(WindowsObject):
                               handle(parent),
                               handle(menu),
                               hInstance,
-                              id(self))       
-
-        del createHndlMap[id(self)]
+                              tmpId)       
+        del createHndlMap[tmpId]
 
 ##         print """
 ##         CreateWindowEx [exStyle = %d, className = %s,

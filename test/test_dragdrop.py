@@ -37,7 +37,7 @@ from venster.lib import list
 
 from venster.lib.ole import *
 
-from ctypes.com import COMObject
+from comtypes import COMObject
 
 comctl.InitCommonControls(comctl.ICC_LISTVIEW_CLASSES | comctl.ICC_COOL_CLASSES |\
                           comctl.ICC_USEREX_CLASSES)

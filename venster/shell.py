@@ -1,7 +1,7 @@
 from windows import *
 from wtl import *
 
-from ctypes.com import GUID
+from comtypes import GUID
 
 NIN_SELECT          = (WM_USER + 0)
 NINF_KEY            = 0x1

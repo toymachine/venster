@@ -30,15 +30,14 @@ class MyWindow(Window):
     _window_background_ = GetStockObject(WHITE_BRUSH)
     _window_icon_ = _window_icon_sm_ = Icon("blinky.ico")
 
+    @msg_handler(WM_DESTROY)
     def OnDestroy(self, event):
-        application.Exit()
+        application.Quit()
 
-    msg_handler(WM_DESTROY)(OnDestroy)
-
-myWindow = MyWindow()
-
-application = Application()
-application.Run()
+if __name__ == '__main__':     
+    myWindow = MyWindow()
+    application = Application()
+    application.Run()
 
     
 
