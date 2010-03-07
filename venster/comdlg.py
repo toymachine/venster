@@ -107,6 +107,7 @@ class FileDialog(OPENFILENAME):
             import os
             cwd = os.getcwd()
             if self.DoIt() != 0:
+                #print repr(szPath)
                 return szPath[:szPath.find('\0')].strip()
             else:
                 return None

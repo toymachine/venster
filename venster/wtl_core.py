@@ -85,6 +85,7 @@ def globalWndProc(hWnd, nMsg, wParam, lParam):
             #this is a known venster window, let the window process its own msgs
             handled, result = window.WndProc(hWnd, nMsg, wParam, lParam)
             if handled:
+                assert type(result) == int
                 return result
     
             if window._issubclassed_:
@@ -260,7 +261,8 @@ class Window(WindowsObject):
                  width = CW_USEDEFAULT,
                  height = CW_USEDEFAULT,
                  hWnd = None,
-                 visible = True):
+                 visible = True,
+                 ctrlId = None):
 
         if hWnd: #wrapping instead of creating
             self.m_handle = hWnd #note client is responsible for deleting
@@ -322,11 +324,14 @@ class Window(WindowsObject):
         else:
             style &= ~WS_VISIBLE
             
+        #size handling, does not work OK!, try setting initial width or height does 
+        #not work
         left, right = rcPos.left, rcPos.right
         top, bottom = rcPos.top, rcPos.bottom
 
         if width == CW_USEDEFAULT:
             width = self._window_width_
+        
         if left == CW_USEDEFAULT and width != CW_USEDEFAULT:
             right = CW_USEDEFAULT + width
 
@@ -335,11 +340,13 @@ class Window(WindowsObject):
         if top == CW_USEDEFAULT and height != CW_USEDEFAULT:
             bottom = CW_USEDEFAULT + height
         
+        #print left, top, right - left, bottom - top
+        
         #for normal windows created trough venster, the mapping between window handle
         #and window instance will be established by processing the WM_NCCREATE msg
         #and looking up the instance in the createhndlMap
         #tmpId = len(createHndlMap) + 1
-        tmpId = id(self)
+        tmpId = id(self) #TODO why must this be a 'pointer', e.g. not just int?
         createHndlMap[tmpId] = self
         hWnd = CreateWindowEx(exStyle,
                               className,
@@ -350,7 +357,7 @@ class Window(WindowsObject):
                               right - left,
                               bottom - top,
                               handle(parent),
-                              handle(menu),
+                              handle(menu or ctrlId),
                               hInstance,
                               tmpId)       
         del createHndlMap[tmpId]
