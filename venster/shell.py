@@ -60,5 +60,12 @@ class NOTIFYICONDATA(Structure):
                 ("dwInfoFlags", DWORD),
                 ("guidItem", GUID)]
 
+class DLLVERSIONINFO(Structure):
+    _fields_ = [("cbSize", DWORD),
+                ("dwMajorVersion", DWORD),
+                ("dwMinorVersion", DWORD),
+                ("dwBuildNumber", DWORD),
+                ("dwPlatformID", DWORD)]
+                
 Shell_NotifyIcon = windll.shell32.Shell_NotifyIcon
 SHGetFolderPath = windll.shell32.SHGetFolderPathA

@@ -713,9 +713,10 @@ ImageList_SetBkColor = windll.comctl32.ImageList_SetBkColor
 
 InitCommonControlsEx = windll.comctl32.InitCommonControlsEx
 
+
 class Button(Window):
     _window_class_ = BUTTON
-    _window_style_ = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON
+    _window_style_ = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON
     
         
 class StatusBar(Window):
@@ -1058,3 +1059,11 @@ def InitCommonControls(dwICC):
     iccex.dwSize = sizeof(INITCOMMONCONTROLSEX)
     iccex.dwICC = dwICC
     InitCommonControlsEx(byref(iccex))
+
+def GetCommonControlDllVersion():
+    from shell import DLLVERSIONINFO
+    info = DLLVERSIONINFO()
+    info.cbSize = sizeof(DLLVERSIONINFO)
+    windll.comctl32.DllGetVersion(byref(info))
+    return info
+    
