@@ -802,6 +802,8 @@ def Fail(value):
         return value
     
 GetModuleHandle = windll.kernel32.GetModuleHandleA
+GetCurrentProcess = windll.kernel32.GetCurrentProcess
+GetCurrentProcessId = windll.kernel32.GetCurrentProcessId
 PostQuitMessage= windll.user32.PostQuitMessage
 DefWindowProc = windll.user32.DefWindowProcA
 CallWindowProc = windll.user32.CallWindowProcA
@@ -889,6 +891,8 @@ CallNextHookEx = windll.user32.CallNextHookEx
 UnhookWindowsHookEx = windll.user32.UnhookWindowsHookEx
 
 GetCurrentThreadId = windll.kernel32.GetCurrentThreadId
+GetModuleFileName = windll.kernel32.GetModuleFileNameA
+GetTempPath = windll.kernel32.GetTempPathA
 
 MessageBox = windll.user32.MessageBoxA
 SetWindowText = windll.user32.SetWindowTextA
